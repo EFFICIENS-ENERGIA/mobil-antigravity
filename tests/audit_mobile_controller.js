@@ -252,7 +252,7 @@ async function runFullAudit() {
     try {
       // 1. Capture écran de verrouillage (avec bouton FaceID)
       execSync(`"${edgePath}" --headless --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot="${screenshotLock}" ${BASE_URL}`, {
-        timeout: 10000
+        timeout: 20000
       });
 
       // 2. Récupération de l'URL d'appairage direct via /api/status
@@ -262,7 +262,7 @@ async function runFullAudit() {
 
       // 3. Capture dashboard déverrouillé avec l'URL d'appairage Seb
       execSync(`"${edgePath}" --headless --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot="${screenshotDash}" "${pairingUrl}"`, {
-        timeout: 10000
+        timeout: 20000
       });
 
       const hasLock = fs.existsSync(screenshotLock) && fs.statSync(screenshotLock).size > 1000;
