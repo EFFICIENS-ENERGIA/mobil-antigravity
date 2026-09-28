@@ -1,0 +1,13 @@
+.env*.local
+.env
+.next/
+node_modules/
+*.log
+.DS_Store
+.github/
+*.exe
+*.msix
+*.iso
+*.fdmdownload
+*.zip
+data/security_audit.log

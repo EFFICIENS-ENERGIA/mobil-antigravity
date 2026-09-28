@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mobil Antigravity - Centre de Gestion Seb (07 78 24 65 67)</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mobil AGY">
+  <meta name="theme-color" content="#0a0d14">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+
+  <!-- Stylesheet Mobile First -->
+  <link rel="stylesheet" href="/css/mobile.css">
+</head>
+<body>
+
+  <!-- Écran de Verrouillage Sécurisé (Lock Screen) -->
+  <div class="lock-screen" id="lock-screen">
+    <div class="lock-shield">🛡️</div>
+    <div class="lock-title">MOBIL ANTIGRAVITY</div>
+    <div class="lock-subtitle">GESTION & PILOTAGE SEB • 07 78 24 65 67</div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+      Saisissez votre code PIN maître pour déverrouiller
+    </div>
+
+    <div class="pin-display">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+
+    <div class="keypad-grid">
+      <button class="keypad-btn" data-val="1">1</button>
+      <button class="keypad-btn" data-val="2">2</button>
+      <button class="keypad-btn" data-val="3">3</button>
+      <button class="keypad-btn" data-val="4">4</button>
+      <button class="keypad-btn" data-val="5">5</button>
+      <button class="keypad-btn" data-val="6">6</button>
+      <button class="keypad-btn" data-val="7">7</button>
+      <button class="keypad-btn" data-val="8">8</button>
+      <button class="keypad-btn" data-val="9">9</button>
+      <button class="keypad-btn action-btn" data-val="clear">Effacer</button>
+      <button class="keypad-btn" data-val="0">0</button>
+      <button class="keypad-btn action-btn" data-val="submit">OK</button>
+    </div>
+
+    <button class="bio-unlock-btn" id="bio-unlock-btn" onclick="unlockWithBiometrics()">
+      <span>🔓</span>
+      <span>Déverrouiller FaceID / Empreinte</span>
+    </button>
+
+    <div class="lock-error" id="lock-error-msg"></div>
+
+    <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 15px;">
+      Code par défaut : 6567 (ou flashez le QR Code de votre PC)
+    </div>
+  </div>
+
+  <!-- Header Fixe Mobile -->
+  <header class="mobile-header">
+    <div class="brand-wrapper">
+      <img src="/icons/icon-192.svg" alt="AGY Logo" class="brand-logo">
+      <div class="brand-info">
+        <h1>MOBIL ANTIGRAVITY</h1>
+        <div class="brand-subtitle">Smart-Gestion • Seb</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="security-status-badge">🔒 AES</span>
+      <button class="btn btn-secondary" style="width: auto; min-height: 32px; padding: 4px 8px; font-size: 0.75rem;" onclick="logout()" title="Verrouiller la session">
+        🔒
+      </button>
+      <div class="header-status" id="header-status-pill">
+        <span class="status-dot"></span>
+        <span id="header-ip">192.168.1.76:3000</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu Principal Défilable -->
+  <main class="content-area">
+
+    <!-- ONGLET 1 : PROJETS ANTIGRAVITY -->
+    <section class="tab-pane active" id="tab-projects">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <h2 style="font-size: 1.1rem; font-weight: 700;">Projets Machine</h2>
+        <span class="badge badge-emerald" id="project-count-badge">Chargement...</span>
+      </div>
+
+      <!-- Bannière d'installation PWA si disponible -->
+      <div class="glass-card" id="pwa-install-banner" style="display: none; background: rgba(16, 185, 129, 0.12); border-color: var(--border-emerald);">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--emerald-light);">Installer l'Application</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Ajoutez le contrôleur sur votre écran d'accueil.</div>
+          </div>
+          <button class="btn btn-primary" style="width: auto; min-height: 38px; padding: 6px 14px; font-size: 0.8rem;" onclick="installPwa()">
+            Installer
+          </button>
+        </div>
+      </div>
+
+      <div id="projects-list">
+        <div class="glass-card" style="text-align: center; color: var(--text-muted);">
+          <p>Scan des répertoires en cours...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 2 : PILOTAGE & ACTIONS RAPIDES -->
+    <section class="tab-pane" id="tab-actions">
+      <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Pilotage 1-Tap</h2>
+
+      <!-- ACCÈS 4G/5G HORS DOMICILE -->
+      <div class="glass-card remote-access-card" id="remote-tunnel-card">
+        <div class="card-header">
+          <div class="card-title">🌐 Accès 4G/5G Hors Domicile</div>
+          <span class="badge badge-amber" id="tunnel-status-badge">Inactif</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+          Tunnel chiffré sécurisé HTTPS pour piloter vos projets Antigravity où que vous soyez sur votre smartphone.
+        </p>
+        <div id="remote-url-box" style="display: none; margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid var(--border-emerald);">
+          <div style="font-size: 0.72rem; color: var(--emerald-light); font-weight: 700; text-transform: uppercase;">URL Publique Sécurisée :</div>
+          <a href="#" id="remote-url-link" target="_blank" rel="noopener noreferrer" style="font-family: var(--font-mono); font-size: 0.85rem; color: #fff; word-break: break-all; text-decoration: underline;">https://...</a>
+        </div>
+        <div class="btn-grid">
+          <button class="btn btn-primary" id="btn-toggle-tunnel" onclick="toggleRemoteTunnel()">
+            🌐 Activer Accès 4G/5G
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card action-card">
+        <div class="card-header">
+          <div class="card-title">⚡ Commandes Serveur SaaS</div>
+          <span class="badge badge-emerald">Port 8092</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Gérez le serveur RDV-Hub (Maison Feuille) à distance.</p>
+        <div class="btn-grid">
+          <button class="btn btn-primary" onclick="triggerAction('start_saas_server')">
+            🟢 Lancer RDV-Hub (8092)
+          </button>
+          <button class="btn btn-danger" onclick="triggerAction('stop_saas_server')">
+            🔴 Arrêter RDV-Hub
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card action-card">
+        <div class="card-header">
+          <div class="card-title">🛡️ Bancs d'Essai & Audits QA</div>
+          <span class="badge badge-blue">@AUD</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Exécutez un audit automatisé sous Edge Chromium Headless sans concession.</p>
+        <button class="btn btn-secondary" onclick="triggerAction('run_audit', 'SAAS EFFICIENS ENERGIA')">
+          🛡️ Lancer Audit Edge Chromium
+        </button>
+      </div>
+
+      <div class="glass-card action-card">
+        <div class="card-header">
+          <div class="card-title">📱 Alertes & Notifications Seb</div>
+          <span class="badge badge-amber">07 78 24 65 67</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Transmettre instantanément le bilan de santé des projets par SMS.</p>
+        <button class="btn btn-outline-emerald" onclick="triggerAction('send_sms_status')">
+          📱 Envoyer Rapport SMS à Seb
+        </button>
+      </div>
+
+      <div class="glass-card action-card">
+        <div class="card-header">
+          <div class="card-title">⚖️ Intégrité & Règles Antigravity</div>
+          <span class="badge badge-emerald">Règles 00 à 18</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Contrôler la conformité stricte et l'absence de régression.</p>
+        <button class="btn btn-secondary" onclick="triggerAction('check_rules')">
+          ⚖️ Vérifier les 18 Règles
+        </button>
+      </div>
+    </section>
+
+    <!-- ONGLET 3 : CONSOLE & LOGS TEMPS RÉEL -->
+    <section class="tab-pane" id="tab-console">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <h2 style="font-size: 1.1rem; font-weight: 700;">Console Système</h2>
+        <span class="badge badge-emerald">SSE Connecté</span>
+      </div>
+
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <span>antigravity@host:~$</span>
+          <div class="terminal-controls">
+            <button class="terminal-btn" id="toggle-scroll-btn">Défilement: Auto</button>
+            <button class="terminal-btn" id="clear-logs-btn">Effacer</button>
+          </div>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div class="log-line log-system">Console de supervision mobile initialisée.</div>
+          <div class="log-line log-system">Écoute des événements système sécurisés en cours...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 4 : PROFIL SEB, SMS & SÉCURITÉ -->
+    <section class="tab-pane" id="tab-seb">
+      <div class="glass-card profile-card">
+        <div class="profile-avatar">👑</div>
+        <div class="profile-name">Sébastien (Seb)</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">Manager / Product Owner</div>
+        <div class="profile-phone">07 78 24 65 67</div>
+
+        <div class="btn-grid">
+          <a href="tel:+33778246567" class="btn btn-primary">
+            📞 Appeler Seb
+          </a>
+          <a href="sms:+33778246567" class="btn btn-outline-emerald">
+            💬 SMS Natif
+          </a>
+        </div>
+        <div style="margin-top: 12px;">
+          <button class="btn btn-danger" style="min-height: 40px; font-size: 0.85rem;" onclick="logout()">
+            🔒 Verrouiller la Session
+          </button>
+        </div>
+      </div>
+
+      <!-- Envoi SMS d'Alerte -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">💬 Message Direct vers 07 78 24 65 67</div>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <input type="text" id="sms-input" placeholder="Message d'alerte pour Seb..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 10px; color: #fff; font-size: 0.9rem; outline: none;">
+        </div>
+        <button class="btn btn-primary" onclick="sendSmsManual()">
+          Transmettre le SMS
+        </button>
+
+        <div style="margin-top: 16px;">
+          <h4 style="font-size: 0.85rem; margin-bottom: 8px; color: var(--text-muted);">Historique récent :</h4>
+          <div id="sms-history-list"></div>
+        </div>
+      </div>
+
+      <!-- Journal d'Audit de Sécurité OWASP -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">🛡️ Journal de Sécurité (OWASP A09)</div>
+          <span class="badge badge-emerald">Audit Local</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
+          Traces horodatées des connexions, rejets anti-brute-force et intégrité des sessions.
+        </p>
+        <div id="security-events-list"></div>
+      </div>
+
+      <!-- Appairage QR Code -->
+      <div class="glass-card" style="text-align: center;">
+        <div class="card-header" style="justify-content: center;">
+          <div class="card-title">📱 Flasher pour Connecter un Téléphone</div>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+          Scannez ce QR Code avec l'appareil photo de votre smartphone relié au même Wi-Fi.
+        </p>
+        <div class="qr-box">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="180" height="180">
+            <rect width="256" height="256" fill="#0d1117" rx="16"/>
+            <!-- Coin Haut-Gauche -->
+            <rect x="24" y="24" width="56" height="56" fill="#10b981" rx="8"/>
+            <rect x="32" y="32" width="40" height="40" fill="#0d1117" rx="4"/>
+            <rect x="40" y="40" width="24" height="24" fill="#10b981" rx="2"/>
+            <!-- Coin Haut-Droit -->
+            <rect x="176" y="24" width="56" height="56" fill="#10b981" rx="8"/>
+            <rect x="184" y="32" width="40" height="40" fill="#0d1117" rx="4"/>
+            <rect x="192" y="40" width="24" height="24" fill="#10b981" rx="2"/>
+            <!-- Coin Bas-Gauche -->
+            <rect x="24" y="176" width="56" height="56" fill="#10b981" rx="8"/>
+            <rect x="32" y="184" width="40" height="40" fill="#0d1117" rx="4"/>
+            <rect x="40" y="192" width="24" height="24" fill="#10b981" rx="2"/>
+            <!-- Matrice -->
+            <g fill="#10b981" opacity="0.9">
+              <rect x="96" y="96" width="12" height="12" rx="2"/>
+              <rect x="116" y="96" width="12" height="12" rx="2"/>
+              <rect x="144" y="96" width="12" height="12" rx="2"/>
+              <rect x="96" y="116" width="12" height="12" rx="2"/>
+              <rect x="124" y="116" width="12" height="12" rx="2"/>
+              <rect x="144" y="116" width="12" height="12" rx="2"/>
+              <rect x="104" y="136" width="12" height="12" rx="2"/>
+              <rect x="132" y="136" width="12" height="12" rx="2"/>
+              <rect x="152" y="136" width="12" height="12" rx="2"/>
+              <rect x="176" y="96" width="12" height="12" rx="2"/>
+              <rect x="200" y="116" width="12" height="12" rx="2"/>
+              <rect x="184" y="144" width="12" height="12" rx="2"/>
+              <rect x="212" y="144" width="12" height="12" rx="2"/>
+              <rect x="96" y="176" width="12" height="12" rx="2"/>
+              <rect x="120" y="184" width="12" height="12" rx="2"/>
+              <rect x="144" y="176" width="12" height="12" rx="2"/>
+              <rect x="104" y="204" width="12" height="12" rx="2"/>
+              <rect x="136" y="212" width="12" height="12" rx="2"/>
+              <rect x="180" y="180" width="12" height="12" rx="2"/>
+              <rect x="204" y="200" width="12" height="12" rx="2"/>
+              <rect x="188" y="216" width="12" height="12" rx="2"/>
+            </g>
+            <rect x="100" y="100" width="56" height="56" fill="#0d1117" rx="8" stroke="#10b981" stroke-width="2"/>
+            <text x="128" y="135" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" fill="#10b981" text-anchor="middle">AGY</text>
+          </svg>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--emerald-light); font-weight: 700; margin-top: 8px;">
+          http://192.168.1.76:3000
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bouton Flottant Micro Commande Vocale -->
+  <button class="voice-fab" id="voice-fab" onclick="toggleVoiceAssistant()" title="Commande Vocale (Micro)">
+    🎙️
+  </button>
+
+  <!-- Modal d'Assistant Vocal -->
+  <div class="voice-overlay hidden" id="voice-modal">
+    <div class="voice-card">
+      <div style="font-size: 2.4rem; margin-bottom: 8px;" id="voice-icon">🎙️</div>
+      <div class="voice-title" id="voice-title">À l'écoute de Seb...</div>
+      <div class="voice-waves" id="voice-waves">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+      <div class="voice-transcript" id="voice-transcript">« Parlez... Ex: Lance le serveur SaaS, Audit de sécurité, État du système »</div>
+      <div class="voice-status" id="voice-status">Écoute active en français...</div>
+      <div style="margin-top: 18px; display: flex; gap: 10px; justify-content: center; width: 100%;">
+        <button class="btn btn-secondary" style="min-height: 38px; font-size: 0.85rem; width: auto; padding: 6px 20px;" onclick="closeVoiceAssistant()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar Mobile -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="projects">
+      <span class="nav-icon">📂</span>
+      <span>Projets</span>
+    </button>
+    <button class="nav-item" data-tab="actions">
+      <span class="nav-icon">⚡</span>
+      <span>Pilotage</span>
+    </button>
+    <button class="nav-item" data-tab="console">
+      <span class="nav-icon">🖥️</span>
+      <span>Console</span>
+    </button>
+    <button class="nav-item" data-tab="seb">
+      <span class="nav-icon">👑</span>
+      <span>Seb</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
+  <script>
+    // Enregistrement du Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[PWA] Service Worker actif:', reg.scope))
+          .catch(err => console.error('[PWA] Erreur Service Worker:', err));
+      });
+    }
+  </script>
+</body>
+</html>

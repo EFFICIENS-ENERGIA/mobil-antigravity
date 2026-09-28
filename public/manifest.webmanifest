@@ -1,0 +1,24 @@
+{
+  "name": "Antigravity Mobile Pilot - Seb",
+  "short_name": "AGY Pilot",
+  "description": "Contrôleur mobile et pilotage à distance des projets ANTIGRAVITY pour Seb (07 78 24 65 67)",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0d14",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

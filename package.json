@@ -1,0 +1,25 @@
+{
+  "name": "mobil-antigravity",
+  "version": "1.0.0",
+  "description": "Système de Gestion et Pilotage Mobile Sécurisé de l'écosystème ANTIGRAVITY - Seb (07 78 24 65 67)",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "audit": "node tests/audit_mobile_controller.js",
+    "test": "node tests/audit_mobile_controller.js"
+  },
+  "keywords": [
+    "antigravity",
+    "mobile-pilot",
+    "security-hardened",
+    "remote-tunnel",
+    "webauthn",
+    "voice-assistant",
+    "supabase-ssr",
+    "owasp"
+  ],
+  "author": "Antigravity Multi-Agents Team (Seb / @CE / @DEV / @UIX / @OPS / @AUD / @DOC)",
+  "license": "ISC"
+}
