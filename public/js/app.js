@@ -737,25 +737,92 @@ function closeVoiceAssistant() {
     try { speechRecognition.stop(); } catch {}
   }
   isListening = false;
+async function requestMicPermissionExplicitly() {
+  triggerHaptic();
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+      showToast('Microphone débloqué avec succès !', '🎙️');
+      startVoiceRecognition();
+      return true;
+    } catch (err) {
+      showToast('Permission refusée par le navigateur.', '❌');
+      showMicNotAllowedHelp(err.name);
+      return false;
+    }
+  } else {
+    showMicNotAllowedHelp('not-supported');
+    return false;
+  }
+}
+
+function showMicNotAllowedHelp(errorType = 'not-allowed') {
+  const transcriptEl = document.getElementById('voice-transcript');
+  const statusEl = document.getElementById('voice-status');
+  const waves = document.getElementById('voice-waves');
+  if (waves) waves.style.display = 'none';
+
+  const isHttp = window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  const remoteLink = document.getElementById('remote-url-link')?.href || 'https://agy-seb-195e7f.loca.lt';
+
+  if (statusEl) {
+    statusEl.innerHTML = `
+      <div style="color: #f87171; font-weight: 700; margin-bottom: 6px;">
+        ⚠️ Micro bloqué (${escapeHtml(errorType)})
+      </div>
+      <div style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.4; text-align: left; background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 8px; margin-bottom: 8px;">
+        ${isHttp ? `
+          <strong>Cause :</strong> Chrome et Safari bloquent le micro sur <code>http://</code> (non sécurisé).<br><br>
+          👉 <strong>Solution :</strong> Ouvrez l'application via votre adresse <strong>HTTPS 4G/5G</strong> :<br>
+          <a href="${remoteLink}" target="_blank" rel="noopener noreferrer" style="color: var(--emerald-light); font-weight: 700; text-decoration: underline;">${remoteLink} ↗</a>
+        ` : `
+          👉 <strong>Comment débloquer :</strong><br>
+          1. Touchez le <strong>cadenas 🔒</strong> ou les paramètres de site dans la barre d'adresse.<br>
+          2. Activez <strong>Microphone : Autoriser</strong>.<br>
+          3. Touchez ensuite "Réessayer le micro" ci-dessous.
+        `}
+      </div>
+    `;
+  }
+
+  if (transcriptEl) {
+    transcriptEl.innerHTML = `
+      <div style="margin-top: 6px;">
+        <div style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 8px;">Commandes rapides 1-clic directes :</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Lance SmartTrip')">✈️ "Lance SmartTrip (8080)"</button>
+          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Lance le serveur SaaS')">⚡ "Lance le serveur SaaS (8092)"</button>
+          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Lance le site Bâti-Excellence')">🏗️ "Lance Bâti-Excellence (8089)"</button>
+          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Audit de sécurité')">🛡️ "Audit @AUD"</button>
+          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Envoie un SMS à Seb')">📱 "Envoie un SMS à Seb"</button>
+        </div>
+        <div style="margin-top: 10px;">
+          <button class="btn btn-outline-emerald" onclick="requestMicPermissionExplicitly()" style="width: 100%; font-size: 0.8rem; min-height: 40px;">
+            🔄 Réessayer d'activer le micro
+          </button>
+        </div>
+      </div>
+    `;
+  }
 }
 
 function startVoiceRecognition() {
   const transcriptEl = document.getElementById('voice-transcript');
   const statusEl = document.getElementById('voice-status');
+  const waves = document.getElementById('voice-waves');
+  if (waves) waves.style.display = 'flex';
+
+  const isHttp = window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  if (isHttp) {
+    // Si HTTP non-sécurisé sur smartphone, avertir immédiatement avec solution HTTPS
+    showMicNotAllowedHelp('http-insecure-context');
+    return;
+  }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    if (statusEl) statusEl.textContent = 'Micro non supporté par ce navigateur.';
-    if (transcriptEl) {
-      transcriptEl.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px;">Commandes rapides 1-clic :</div>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Lance le serveur SaaS')">⚡ "Lance le serveur SaaS"</button>
-          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Audit de sécurité')">🛡️ "Audit de sécurité"</button>
-          <button class="btn btn-secondary" onclick="executeVoiceCommandText('Envoie un SMS à Seb')">📱 "Envoie un SMS à Seb"</button>
-        </div>
-      `;
-    }
+    showMicNotAllowedHelp('speech-not-supported');
     return;
   }
 
@@ -789,8 +856,13 @@ function startVoiceRecognition() {
     };
 
     speechRecognition.onerror = (event) => {
-      if (statusEl) statusEl.textContent = `Erreur micro: ${event.error}`;
       isListening = false;
+      console.warn('[Microphone] speechRecognition.onerror:', event.error);
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        showMicNotAllowedHelp(event.error);
+      } else {
+        if (statusEl) statusEl.textContent = `Erreur micro: ${event.error}`;
+      }
     };
 
     speechRecognition.onend = () => {
@@ -799,7 +871,7 @@ function startVoiceRecognition() {
 
     speechRecognition.start();
   } catch (err) {
-    if (statusEl) statusEl.textContent = 'Erreur initialisation micro.';
+    showMicNotAllowedHelp(err.message || 'init-failed');
   }
 }
 
@@ -850,3 +922,4 @@ window.toggleRemoteTunnel = toggleRemoteTunnel;
 window.toggleVoiceAssistant = toggleVoiceAssistant;
 window.closeVoiceAssistant = closeVoiceAssistant;
 window.executeVoiceCommandText = executeVoiceCommandText;
+window.requestMicPermissionExplicitly = requestMicPermissionExplicitly;

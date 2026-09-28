@@ -1,5 +1,45 @@
 [
   {
+    "id": "sms_1790632621916",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "Test sécurité @AUD : Session chiffrée validée.",
+    "trigger": "smartphone_manual",
+    "timestamp": "2026-09-28T21:57:01.916Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790631913851",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"templates\" lancé avec succès sur le port 8115 (http://192.168.1.76:8115). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-09-28T21:45:13.851Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790631911884",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"Bâti-Excellence Pro\" lancé avec succès sur le port 8089 (http://192.168.1.76:8089). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-09-28T21:45:11.883Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790631801754",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-09-28T21:43:21.754Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
     "id": "sms_1790631726533",
     "to": "+33778246567",
     "displayPhone": "07 78 24 65 67",
