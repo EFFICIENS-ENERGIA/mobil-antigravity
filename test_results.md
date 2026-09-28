@@ -2,19 +2,19 @@
 
 > **Projet** : Antigravity Mobile Pilot — Version Durcie  
 > **Auditeur** : @AUD (Lead QA & Security)  
-> **Date & Heure** : 28/09/2026 22:45:07  
-> **Score Global** : **15/15 PASS (100% PASS)**  
+> **Date & Heure** : 28/09/2026 23:42:06  
+> **Score Global** : **17/17 PASS (100% PASS)**  
 
 ---
 
-## 📋 Tableau Matriciel des 15 Épreuves de Sécurité & Innovations
+## 📋 Tableau Matriciel des 17 Épreuves de Sécurité & Innovations
 
 | # | Nom de l'Épreuve | Statut | Détails & Métriques |
 |:---:|---|:---:|---|
 | **1** | En-têtes HTTP de Sécurité Renforcés (OWASP Top 10) | ✅ PASS | CSP, X-Frame-Options: DENY, nosniff, Referrer-Policy conformes |
 | **2** | Barrière d’Authentification (Rejet 401 sans Token) | ✅ PASS | Code HTTP 401 (Accès non authentifié bloqué) |
-| **3** | Authentification par Code PIN Maître (6567) | ✅ PASS | Token Bearer généré (5cbf1b02929c5808...) |
-| **4** | Accès Protégé avec Jeton de Session Valide | ✅ PASS | 12 projets Antigravity déverrouillés |
+| **3** | Authentification par Code PIN Maître (6567) | ✅ PASS | Token Bearer généré (177b30e75da5ec23...) |
+| **4** | Accès Protégé avec Jeton de Session Valide | ✅ PASS | 11 projets Antigravity déverrouillés |
 | **5** | Protection Anti-CSRF (Rejet d’Origine Externe) | ✅ PASS | Code HTTP 403 (Origine frauduleuse bloquée) |
 | **6** | Protection Anti-DoS (Limite de Charge Utile 10 Ko) | ✅ PASS | Code HTTP 413 (Payload Too Large rejeté) |
 | **7** | Sécurité OWASP (Rejet Injections Commandes) | ✅ PASS | Code HTTP 400 (Rejeté conforme) |
@@ -25,7 +25,9 @@
 | **12** | Module de Commandes Vocales par Micro (NLP Français) | ✅ PASS | Intention détectée: [START_SAAS], Réponse vocale: "Compris Seb. Démarrage du serveur RDV-Hub Saa..." |
 | **13** | Déverrouillage Biométrique FaceID / Empreinte (WebAuthn) | ✅ PASS | Challenge cryptographique généré et assertion validée avec succès |
 | **14** | Passerelle d’Accès Distant 4G/5G Sécurisée (WAN / 4G / 5G) | ✅ PASS | Statut tunnel exposé dans /api/status (Actif: true) |
-| **15** | Preuve Visuelle Edge Chromium Headless (Lock Screen, Dashboard, Voice UI) | ✅ PASS | Captures générées : Lock Screen (56144 o), Dashboard (51570 o) |
+| **15** | Lancement & Arrêt Universel 1-Tap de Projet (API /api/action) | ✅ PASS | Lancement (Projet "SmartTrip Pro" lancé avec succès sur le port 8080 (PID 5768)), Processus vérifié (3 actif), Arrêt validé |
+| **16** | Passerelle Reverse Proxy 4G/5G (/proxy/:port/) avec Fallback 502 | ✅ PASS | Code HTTP 502 géré avec interface de repli claire pour Seb |
+| **17** | Preuve Visuelle Edge Chromium Headless (Lock Screen, Dashboard, Voice UI) | ✅ PASS | Captures générées : Lock Screen (57821 o), Dashboard (21638 o) |
 
 ---
 

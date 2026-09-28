@@ -418,14 +418,22 @@ async function loadProjects() {
       else if (proj.status === 'TESTED') badgeClass = 'badge-blue';
       else if (proj.statusColor === 'amber') badgeClass = 'badge-amber';
 
-      const isSaas = proj.name.includes('SAAS EFFICIENS ENERGIA') || proj.name.includes('rdv_hub');
+      let icon = '📁';
+      const lower = proj.name.toLowerCase();
+      if (lower.includes('saas') || lower.includes('rdv_hub')) icon = '⚡';
+      else if (lower.includes('smarttrip') || lower.includes('homeagy')) icon = '✈️';
+      else if (lower.includes('construction') || lower.includes('bati')) icon = '🏗️';
+      else if (lower.includes('mobil')) icon = '📱';
+
+      const safeName = escapeHtml(proj.name);
+      const appUrl = proj.projectUrl || `http://${window.location.hostname}:${proj.defaultPort}`;
 
       return `
         <div class="glass-card" id="card-${proj.id}">
           <div class="card-header">
             <div class="card-title">
-              <span>${isSaas ? '⚡' : '📁'}</span>
-              <span>${escapeHtml(proj.name)}</span>
+              <span>${icon}</span>
+              <span>${escapeHtml(proj.displayName || proj.name)}</span>
             </div>
             <span class="badge ${badgeClass}">${proj.statusLabel}</span>
           </div>
@@ -436,24 +444,31 @@ async function loadProjects() {
             <div>Tests : <strong style="color: var(--emerald-light);">${proj.tests ? proj.tests.score : 'N/A'}</strong> (${proj.tests ? proj.tests.count : 0} rapports)</div>
           </div>
 
+          ${proj.isPortActive ? `
+            <div style="margin-bottom: 8px; padding: 6px 10px; background: rgba(16, 185, 129, 0.12); border: 1px solid var(--border-emerald); border-radius: 8px; font-size: 0.76rem; display: flex; align-items: center; justify-content: space-between;">
+              <span style="color: var(--emerald-light); font-weight: 600;">⚡ En direct :</span>
+              <a href="${appUrl}" target="_blank" rel="noopener noreferrer" style="color: #fff; font-family: var(--font-mono); text-decoration: underline;">Port ${proj.defaultPort} ↗</a>
+            </div>
+          ` : ''}
+
           <div class="btn-grid">
-            ${isSaas ? `
-              ${proj.isPortActive ? `
-                <button class="btn btn-danger" onclick="triggerAction('stop_saas_server')">
-                  Arrêter (8092)
-                </button>
-              ` : `
-                <button class="btn btn-primary" onclick="triggerAction('start_saas_server')">
-                  Lancer SaaS (8092)
-                </button>
-              `}
+            ${proj.isPortActive ? `
+              <a href="${appUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                🌐 Ouvrir l'App
+              </a>
+              <button class="btn btn-danger" onclick="triggerAction('stop_project', '${safeName}')">
+                🔴 Arrêter (${proj.defaultPort || ''})
+              </button>
             ` : `
-              <button class="btn btn-secondary" onclick="triggerAction('run_audit', '${proj.name}')">
-                Audit @AUD
+              <button class="btn btn-primary" onclick="triggerAction('launch_project', '${safeName}')">
+                🟢 Lancer (${proj.defaultPort ? 'Port ' + proj.defaultPort : 'Web'})
+              </button>
+              <button class="btn btn-secondary" onclick="triggerAction('run_audit', '${safeName}')">
+                🛡️ Audit @AUD
               </button>
             `}
             <button class="btn btn-secondary" onclick="triggerAction('check_rules')">
-              Règles
+              ⚖️ Règles
             </button>
           </div>
         </div>

@@ -243,7 +243,48 @@ async function runFullAudit() {
     recordTest(14, 'Passerelle 4G/5G', false, e.message);
   }
 
-  // TEST 15 : Rendu Réel Navigateur Edge Chromium Headless (Lock Screen, Dashboard & Assistant Vocal)
+  // TEST 15 : Lancement & Arrêt Universel 1-Tap de Projet Antigravity (API /api/action)
+  try {
+    const launchRes = await requestHttp('POST', '/api/action', {
+      action: 'launch_project',
+      targetProject: '$HOMEagy2-projectsmy-first-project'
+    }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const launchData = JSON.parse(launchRes.body);
+    const launchOk = launchRes.statusCode === 200 && launchData.success === true;
+
+    const procRes = await requestHttp('GET', '/api/processes', null, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const procData = JSON.parse(procRes.body);
+    const procOk = procRes.statusCode === 200 && procData.success === true && procData.processes.length > 0;
+
+    const stopRes = await requestHttp('POST', '/api/action', {
+      action: 'stop_project',
+      targetProject: '$HOMEagy2-projectsmy-first-project'
+    }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const stopData = JSON.parse(stopRes.body);
+    const stopOk = stopRes.statusCode === 200 && stopData.success === true;
+
+    const valid = launchOk && procOk && stopOk;
+    recordTest(15, 'Lancement & Arrêt Universel 1-Tap de Projet (API /api/action)', valid, `Lancement (${launchData.message}), Processus vérifié (${procData.processes.length} actif), Arrêt validé`);
+  } catch (e) {
+    recordTest(15, 'Lancement & Arrêt de Projet', false, e.message);
+  }
+
+  // TEST 16 : Passerelle Reverse Proxy 4G/5G (/proxy/:port/) avec Fallback 502
+  try {
+    const proxyRes = await requestHttp('GET', '/proxy/8080/');
+    const valid = proxyRes.statusCode === 502 && proxyRes.body.includes('⚠️ Projet non démarré');
+    recordTest(16, 'Passerelle Reverse Proxy 4G/5G (/proxy/:port/) avec Fallback 502', valid, `Code HTTP 502 géré avec interface de repli claire pour Seb`);
+  } catch (e) {
+    recordTest(16, 'Passerelle Reverse Proxy', false, e.message);
+  }
+
+  // TEST 17 : Rendu Réel Navigateur Edge Chromium Headless (Lock Screen, Dashboard & Assistant Vocal)
   const edgePath = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
   const screenshotLock = path.join(CAPTURES_DIR, 'mobile_secure_lock_screen.png');
   const screenshotDash = path.join(CAPTURES_DIR, 'mobile_secure_dashboard.png');
@@ -267,9 +308,9 @@ async function runFullAudit() {
 
       const hasLock = fs.existsSync(screenshotLock) && fs.statSync(screenshotLock).size > 1000;
       const hasDash = fs.existsSync(screenshotDash) && fs.statSync(screenshotDash).size > 1000;
-      recordTest(15, 'Preuve Visuelle Edge Chromium Headless (Lock Screen, Dashboard, Voice UI)', hasLock && hasDash, `Captures générées : Lock Screen (${fs.statSync(screenshotLock).size} o), Dashboard (${fs.statSync(screenshotDash).size} o)`);
+      recordTest(17, 'Preuve Visuelle Edge Chromium Headless (Lock Screen, Dashboard, Voice UI)', hasLock && hasDash, `Captures générées : Lock Screen (${fs.statSync(screenshotLock).size} o), Dashboard (${fs.statSync(screenshotDash).size} o)`);
     } catch (e) {
-      recordTest(15, 'Rendu Navigateur Edge Headless', false, e.message);
+      recordTest(17, 'Rendu Navigateur Edge Headless', false, e.message);
     }
   }
 
@@ -293,7 +334,7 @@ async function runFullAudit() {
 
 ---
 
-## 📋 Tableau Matriciel des 15 Épreuves de Sécurité & Innovations
+## 📋 Tableau Matriciel des 17 Épreuves de Sécurité & Innovations
 
 | # | Nom de l'Épreuve | Statut | Détails & Métriques |
 |:---:|---|:---:|---|

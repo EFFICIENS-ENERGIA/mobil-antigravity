@@ -9,6 +9,8 @@ import { scanAntigravityProjects } from './lib/antigravity_scanner.js';
 import { 
   startSaasServer, 
   stopSaasServer, 
+  launchProject,
+  stopProject,
   runProjectAudit, 
   getRunningProcesses, 
   logEmitter, 
@@ -424,6 +426,12 @@ const server = http.createServer(async (req, res) => {
           case 'stop_saas_server':
             executionResult = await stopSaasServer();
             break;
+          case 'launch_project':
+            executionResult = await launchProject(parsed.targetProject);
+            break;
+          case 'stop_project':
+            executionResult = await stopProject(parsed.targetProject);
+            break;
           case 'run_audit':
             executionResult = await runProjectAudit();
             break;
@@ -511,6 +519,12 @@ const server = http.createServer(async (req, res) => {
         case 'stop_saas_server':
           result = await stopSaasServer();
           break;
+        case 'launch_project':
+          result = await launchProject(payload.targetProject);
+          break;
+        case 'stop_project':
+          result = await stopProject(payload.targetProject);
+          break;
         case 'run_audit':
           result = await runProjectAudit(payload.targetProject || 'entrainement equipe agent');
           break;
@@ -576,6 +590,46 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true, events: getRecentSecurityEvents() }));
     return;
+  }
+
+  // --- REVERSE PROXY POUR ACCÈS 4G/5G AUX PROJETS (/proxy/:port/*) ---
+  if (pathname.startsWith('/proxy/')) {
+    const proxyMatch = pathname.match(/^\/proxy\/(\d+)(\/.*)?$/);
+    if (proxyMatch) {
+      const targetPort = parseInt(proxyMatch[1], 10);
+      const subPath = proxyMatch[2] || '/';
+      const targetUrl = subPath + (url.search || '');
+
+      const proxyReq = http.request({
+        hostname: '127.0.0.1',
+        port: targetPort,
+        path: targetUrl,
+        method: req.method,
+        headers: {
+          ...req.headers,
+          host: `127.0.0.1:${targetPort}`
+        }
+      }, (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res);
+      });
+
+      proxyReq.on('error', () => {
+        if (!res.headersSent) {
+          res.writeHead(502, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(`
+            <div style="font-family: system-ui; max-width: 500px; margin: 40px auto; padding: 24px; background: #1e293b; color: #f8fafc; border-radius: 12px; text-align: center;">
+              <h2>⚠️ Projet non démarré (Port ${targetPort})</h2>
+              <p style="color: #94a3b8; font-size: 0.95rem;">Ce serveur n'est pas encore en cours d'exécution.</p>
+              <p><a href="/" style="display: inline-block; padding: 10px 20px; background: #10b981; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700;">Retourner au Hub Mobile</a></p>
+            </div>
+          `);
+        }
+      });
+
+      req.pipe(proxyReq);
+      return;
+    }
   }
 
   // --- SERVEUR STATIQUE (PWA) AVEC PROTECTION ANTI-PATH TRAVERSAL ---

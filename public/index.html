@@ -137,18 +137,53 @@
         </div>
       </div>
 
+      <!-- SMARTTRIP PRO (PORT 8080) -->
       <div class="glass-card action-card">
         <div class="card-header">
-          <div class="card-title">⚡ Commandes Serveur SaaS</div>
+          <div class="card-title">✈️ SmartTrip Pro</div>
+          <span class="badge badge-emerald">Port 8080</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Comparateur hôtelier multi-OTA & IA géodésique.</p>
+        <div class="btn-grid">
+          <button class="btn btn-primary" onclick="triggerAction('launch_project', '$HOMEagy2-projectsmy-first-project')">
+            🟢 Lancer (8080)
+          </button>
+          <button class="btn btn-danger" onclick="triggerAction('stop_project', '$HOMEagy2-projectsmy-first-project')">
+            🔴 Arrêter
+          </button>
+        </div>
+      </div>
+
+      <!-- BÂTI-EXCELLENCE PRO (PORT 8089) -->
+      <div class="glass-card action-card">
+        <div class="card-header">
+          <div class="card-title">🏗️ Bâti-Excellence Pro</div>
+          <span class="badge badge-emerald">Port 8089</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Site vitrine BTP & Rénovation Énergétique Premium.</p>
+        <div class="btn-grid">
+          <button class="btn btn-primary" onclick="triggerAction('launch_project', 'site_construction')">
+            🟢 Lancer (8089)
+          </button>
+          <button class="btn btn-danger" onclick="triggerAction('stop_project', 'site_construction')">
+            🔴 Arrêter
+          </button>
+        </div>
+      </div>
+
+      <!-- RDV-HUB SAAS (PORT 8092) -->
+      <div class="glass-card action-card">
+        <div class="card-header">
+          <div class="card-title">⚡ RDV-Hub SaaS Pro</div>
           <span class="badge badge-emerald">Port 8092</span>
         </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted);">Gérez le serveur RDV-Hub (Maison Feuille) à distance.</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Gestion des rendez-vous et portail clients Efficiens Energia.</p>
         <div class="btn-grid">
-          <button class="btn btn-primary" onclick="triggerAction('start_saas_server')">
-            🟢 Lancer RDV-Hub (8092)
+          <button class="btn btn-primary" onclick="triggerAction('launch_project', 'SAAS EFFICIENS ENERGIA')">
+            🟢 Lancer (8092)
           </button>
-          <button class="btn btn-danger" onclick="triggerAction('stop_saas_server')">
-            🔴 Arrêter RDV-Hub
+          <button class="btn btn-danger" onclick="triggerAction('stop_project', 'SAAS EFFICIENS ENERGIA')">
+            🔴 Arrêter
           </button>
         </div>
       </div>
