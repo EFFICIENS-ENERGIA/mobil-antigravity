@@ -23,6 +23,7 @@
   "author": "Antigravity Multi-Agents Team (Seb / @CE / @DEV / @UIX / @OPS / @AUD / @DOC)",
   "license": "ISC",
   "dependencies": {
-    "localtunnel": "^2.0.2"
+    "localtunnel": "^2.0.2",
+    "qrcode": "^1.5.4"
   }
 }

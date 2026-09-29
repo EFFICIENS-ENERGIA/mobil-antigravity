@@ -19,7 +19,7 @@ import {
 } from './lib/process_manager.js';
 import { sendSmsNotification, getSmsHistory, SEB_PHONE } from './lib/sms_notifier.js';
 import { isActionAllowed, sanitizePath, escapeHtml, isSafeCommandParam } from './lib/security_guard.js';
-import { printTerminalQr } from './lib/qr_generator.js';
+import { printTerminalQr, generateQrSvg } from './lib/qr_generator.js';
 import { 
   verifyPin, 
   verifyPairingToken, 
@@ -229,6 +229,16 @@ const server = http.createServer(async (req, res) => {
       uptimeSeconds: Math.floor(process.uptime()),
       timestamp: new Date().toISOString()
     }));
+    return;
+  }
+
+  // 1b. GET /api/qr.svg (QR Code vectoriel authentique dynamique)
+  if (req.method === 'GET' && (pathname === '/api/qr.svg' || pathname === '/api/qr')) {
+    const remote = getRemoteTunnelUrl();
+    const target = remote ? `${remote}/?pair=${PAIRING_TOKEN}` : PAIRING_URL;
+    const svg = await generateQrSvg(target, 240);
+    res.writeHead(200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'no-cache' });
+    res.end(svg);
     return;
   }
 
