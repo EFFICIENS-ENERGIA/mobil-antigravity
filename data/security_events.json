@@ -1,5 +1,16 @@
 [
   {
+    "id": "sec_1790632654773_c5gs",
+    "timestamp": "2026-09-28T21:57:34.773Z",
+    "eventType": "ACTION_EXECUTED",
+    "ip": "192.168.1.79",
+    "status": "SUCCESS",
+    "details": {
+      "action": "launch_project",
+      "target": "rdv_hub_omnicanal"
+    }
+  },
+  {
     "id": "sec_1790632633425_0lgl",
     "timestamp": "2026-09-28T21:57:13.425Z",
     "eventType": "ACTION_EXECUTED",
@@ -1008,16 +1019,6 @@
     "details": {
       "action": "check_rules",
       "target": ""
-    }
-  },
-  {
-    "id": "sec_1790631592608_gek4",
-    "timestamp": "2026-09-28T21:39:52.608Z",
-    "eventType": "AUTH_BIOMETRIC_SUCCESS",
-    "ip": "127.0.0.1",
-    "status": "SUCCESS",
-    "details": {
-      "credentialId": "seb_faceid_master_key"
     }
   }
 ]

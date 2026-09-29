@@ -126,9 +126,16 @@
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
           Tunnel chiffré sécurisé HTTPS pour piloter vos projets Antigravity où que vous soyez sur votre smartphone.
         </p>
-        <div id="remote-url-box" style="display: none; margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid var(--border-emerald);">
+        <div id="remote-url-box" style="display: none; margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.45); border-radius: 10px; border: 1px solid var(--border-emerald);">
           <div style="font-size: 0.72rem; color: var(--emerald-light); font-weight: 700; text-transform: uppercase;">URL Publique Sécurisée :</div>
-          <a href="#" id="remote-url-link" target="_blank" rel="noopener noreferrer" style="font-family: var(--font-mono); font-size: 0.85rem; color: #fff; word-break: break-all; text-decoration: underline;">https://...</a>
+          <a href="#" id="remote-url-link" target="_blank" rel="noopener noreferrer" style="font-family: var(--font-mono); font-size: 0.85rem; color: #fff; word-break: break-all; text-decoration: underline; display: block; margin-top: 3px;">https://...</a>
+          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.15); font-size: 0.75rem;">
+            <div style="color: #cbd5e1; margin-bottom: 4px;">🔑 <strong>Mot de passe Localtunnel (IP Hôte) :</strong></div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="remote-tunnel-password" style="font-family: var(--font-mono); font-weight: 800; font-size: 0.9rem; color: var(--emerald-light); background: rgba(16,185,129,0.15); padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px;">78.243.98.219</span>
+              <span style="font-size: 0.68rem; color: var(--text-dim);">(Entrez cette IP si l'écran de sécurité s'affiche)</span>
+            </div>
+          </div>
         </div>
         <div class="btn-grid">
           <button class="btn btn-primary" id="btn-toggle-tunnel" onclick="toggleRemoteTunnel()">

@@ -1,5 +1,15 @@
 [
   {
+    "id": "sms_1790632655059",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub Omnicanal\" lancé avec succès sur le port 8093 (http://192.168.1.76:8093). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-09-28T21:57:35.059Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
     "id": "sms_1790632621916",
     "to": "+33778246567",
     "displayPhone": "07 78 24 65 67",

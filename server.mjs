@@ -31,7 +31,7 @@ import {
 } from './lib/auth_manager.js';
 import { checkRateLimit, resetRateLimit } from './lib/rate_limiter.js';
 import { logSecurityEvent, getRecentSecurityEvents } from './lib/security_audit_logger.js';
-import { startRemoteTunnel, stopRemoteTunnel, getRemoteTunnelUrl, isRemoteTunnelActive } from './lib/remote_tunnel.js';
+import { startRemoteTunnel, stopRemoteTunnel, getRemoteTunnelUrl, isRemoteTunnelActive, getPublicIp } from './lib/remote_tunnel.js';
 import { parseVoiceCommand } from './lib/voice_assistant.js';
 import { 
   generateBiometricChallenge, 
@@ -219,6 +219,8 @@ const server = http.createServer(async (req, res) => {
       remoteUrl: getRemoteTunnelUrl(),
       isTunnelActive: isRemoteTunnelActive(),
       remoteTunnelActive: isRemoteTunnelActive(),
+      publicIp: await getPublicIp(),
+      tunnelPassword: await getPublicIp(),
       hasBiometrics: hasBiometricCredentials(),
       authenticated: !!checkAuth(),
       uptimeSeconds: Math.floor(process.uptime()),

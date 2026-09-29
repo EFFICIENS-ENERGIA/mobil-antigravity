@@ -329,7 +329,7 @@ async function loadStatus() {
       if (ipEl) ipEl.textContent = `${data.localIp}:${data.port}`;
 
       // Synchronisation de l'état du tunnel 4G/5G
-      updateTunnelUI(data.remoteTunnelActive, data.remoteUrl);
+      updateTunnelUI(data.remoteTunnelActive, data.remoteUrl, data.publicIp || data.tunnelPassword);
     }
   } catch (err) {
     console.error('Erreur chargement statut:', err);
@@ -360,11 +360,16 @@ async function toggleRemoteTunnel() {
   }
 }
 
-function updateTunnelUI(active, url) {
+function updateTunnelUI(active, url, publicIp = null) {
   const badge = document.getElementById('tunnel-status-badge');
   const box = document.getElementById('remote-url-box');
   const link = document.getElementById('remote-url-link');
   const btn = document.getElementById('btn-toggle-tunnel');
+  const pwdEl = document.getElementById('remote-tunnel-password');
+
+  if (publicIp && pwdEl) {
+    pwdEl.textContent = publicIp;
+  }
 
   if (active && url) {
     if (badge) {
