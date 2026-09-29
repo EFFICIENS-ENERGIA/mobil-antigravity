@@ -71,7 +71,11 @@
         <div class="brand-subtitle">Smart-Gestion • Seb</div>
       </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <button class="audio-toggle-btn active" id="audio-toggle-btn" onclick="toggleAudioSpeech()" title="Activer / Désactiver la voix parlée">
+        <span id="audio-toggle-icon">🔊</span>
+        <span id="audio-toggle-text" style="font-size: 0.72rem; font-weight: 600;">Voix</span>
+      </button>
       <span class="security-status-badge">🔒 AES</span>
       <button class="btn btn-secondary" style="width: auto; min-height: 32px; padding: 4px 8px; font-size: 0.75rem;" onclick="logout()" title="Verrouiller la session">
         🔒
@@ -370,6 +374,29 @@
       <span>Seb</span>
     </button>
   </nav>
+
+  <!-- Modale de Restitution d'Audit @AUD -->
+  <div class="audit-modal-overlay hidden" id="audit-modal">
+    <div class="audit-modal-card">
+      <div class="audit-modal-header">
+        <div class="audit-modal-title">
+          <span>🛡️</span>
+          <span id="audit-modal-project-name">Rapport d'Audit @AUD</span>
+        </div>
+        <button class="btn btn-secondary" style="width: auto; min-height: 28px; padding: 2px 10px; font-size: 0.8rem;" onclick="closeAuditModal()">✕</button>
+      </div>
+      <div class="audit-score-hero">
+        <div class="audit-score-number" id="audit-modal-score">100% PASS</div>
+        <div class="audit-score-caption" id="audit-modal-caption">Homologation Officielle Lead QA & Sécurité Antigravity</div>
+      </div>
+      <div class="audit-modal-body" id="audit-modal-body">
+        <!-- Épreuves d'audit injectées dynamiquement -->
+      </div>
+      <div class="audit-modal-footer">
+        <button class="btn btn-primary" onclick="closeAuditModal()" style="width: 100%;">Fermer le Rapport</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Notification -->
   <div class="toast" id="toast"></div>

@@ -753,3 +753,285 @@ body {
   font-weight: 700;
 }
 
+/* ======================================================================
+   TÉLÉMÉTRIE DE SANTÉ, GIT EN DIRECT & AUDIT 1-TAP (RÈGLES DEV / UIX)
+   ====================================================================== */
+
+/* Grille des Métriques de Santé */
+.card-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.telemetry-chip {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.telemetry-label {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.telemetry-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.telemetry-val.highlight-emerald {
+  color: var(--emerald-light);
+}
+
+.telemetry-val.highlight-blue {
+  color: #60a5fa;
+}
+
+.telemetry-val.highlight-amber {
+  color: var(--amber);
+}
+
+/* Bulle de Télémétrie Git en direct */
+.git-bubble {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  font-size: 0.76rem;
+}
+
+.git-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.git-branch-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.git-commit-hash {
+  font-family: var(--font-mono);
+  color: var(--emerald-light);
+  font-weight: 700;
+  font-size: 0.72rem;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.git-message {
+  color: var(--text-main);
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.git-meta {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Bouton 1-Tap Audit @AUD */
+.btn-audit-tap {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(16, 185, 129, 0.2) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-audit-tap:hover, .btn-audit-tap:active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%);
+  border-color: #60a5fa;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Modale de Restitution d'Audit @AUD */
+.audit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 13, 20, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.audit-modal-overlay.hidden {
+  display: none;
+}
+
+.audit-modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-emerald);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
+.audit-modal-header {
+  padding: 16px 18px;
+  background: rgba(16, 185, 129, 0.1);
+  border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.audit-modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audit-score-hero {
+  text-align: center;
+  padding: 18px 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.audit-score-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--emerald-light);
+  letter-spacing: -1px;
+}
+
+.audit-score-caption {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.audit-modal-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.audit-test-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+}
+
+.audit-test-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.audit-test-content {
+  flex: 1;
+}
+
+.audit-test-title {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.audit-test-detail {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.audit-modal-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-glass);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  gap: 10px;
+}
+
+/* Contrôle Audio & Text-to-Speech */
+.audio-toggle-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.audio-toggle-btn.active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--border-emerald);
+  color: var(--emerald-light);
+}
+
+.speaking-pulse {
+  animation: audioPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes audioPulse {
+  0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 4px var(--emerald)); }
+  50% { opacity: 0.6; transform: scale(1.08); filter: drop-shadow(0 0 10px var(--emerald-light)); }
+}
+

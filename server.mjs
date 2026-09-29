@@ -448,7 +448,7 @@ const server = http.createServer(async (req, res) => {
             executionResult = await stopProject(parsed.targetProject);
             break;
           case 'run_audit':
-            executionResult = await runProjectAudit();
+            executionResult = await runProjectAudit(parsed.targetProject || 'mobil antigravity');
             break;
           case 'send_sms_status':
             const projects = await scanAntigravityProjects();
@@ -472,6 +472,7 @@ const server = http.createServer(async (req, res) => {
         recognized: parsed.recognized,
         action: parsed.action,
         intent: parsed.intent,
+        targetProject: parsed.targetProject || null,
         replyText: parsed.replyText,
         executionResult
       }));
