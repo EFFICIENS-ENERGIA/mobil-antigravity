@@ -742,6 +742,8 @@ function closeVoiceAssistant() {
     try { speechRecognition.stop(); } catch {}
   }
   isListening = false;
+}
+
 async function requestMicPermissionExplicitly() {
   triggerHaptic();
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {

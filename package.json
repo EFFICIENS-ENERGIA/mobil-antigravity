@@ -21,5 +21,8 @@
     "owasp"
   ],
   "author": "Antigravity Multi-Agents Team (Seb / @CE / @DEV / @UIX / @OPS / @AUD / @DOC)",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "localtunnel": "^2.0.2"
+  }
 }
