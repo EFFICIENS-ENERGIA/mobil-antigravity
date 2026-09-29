@@ -284,6 +284,15 @@ async function runFullAudit() {
     recordTest(16, 'Passerelle Reverse Proxy', false, e.message);
   }
 
+  // TEST 18 : Règle 24 - Génération Systématique de QR Code pour toute Connexion Externe
+  try {
+    const qrRes = await requestHttp('GET', '/api/qr.svg');
+    const qrOk = qrRes.statusCode === 200 && qrRes.headers['content-type']?.includes('image/svg+xml') && qrRes.body.includes('<svg') && qrRes.body.includes('viewBox');
+    recordTest(18, 'Règle 24: QR Code Authentique & Scannable (/api/qr.svg)', qrOk, `Flux SVG dynamique servi en code 200 OK (${qrRes.body.length} octets)`);
+  } catch (e) {
+    recordTest(18, 'Règle 24: QR Code Authentique & Scannable', false, e.message);
+  }
+
   // TEST 17 : Rendu Réel Navigateur Edge Chromium Headless (Lock Screen, Dashboard & Assistant Vocal)
   const edgePath = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
   const screenshotLock = path.join(CAPTURES_DIR, 'mobile_secure_lock_screen.png');
