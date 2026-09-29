@@ -366,20 +366,30 @@ function updateTunnelUI(active, url, publicIp = null) {
   const link = document.getElementById('remote-url-link');
   const btn = document.getElementById('btn-toggle-tunnel');
   const pwdEl = document.getElementById('remote-tunnel-password');
+  const localtunnelNotice = document.getElementById('localtunnel-pwd-notice');
+  const cloudflareNotice = document.getElementById('cloudflare-direct-notice');
 
   if (publicIp && pwdEl) {
     pwdEl.textContent = publicIp;
   }
 
   if (active && url) {
+    const isCloudflare = url.includes('trycloudflare.com');
+
     if (badge) {
       badge.className = 'badge badge-emerald';
-      badge.textContent = '4G/5G Actif';
+      badge.textContent = isCloudflare ? 'Cloudflare Edge 4G/5G' : '4G/5G Actif';
     }
     if (box) box.style.display = 'block';
     if (link) {
       link.href = url;
       link.textContent = url;
+    }
+    if (localtunnelNotice) {
+      localtunnelNotice.style.display = isCloudflare ? 'none' : 'block';
+    }
+    if (cloudflareNotice) {
+      cloudflareNotice.style.display = isCloudflare ? 'block' : 'none';
     }
     if (btn) {
       btn.className = 'btn btn-danger';
