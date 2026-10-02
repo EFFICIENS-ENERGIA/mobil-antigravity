@@ -2291,3 +2291,29 @@ window.handleCardDragEnd = handleCardDragEnd;
 window.setConsoleLevelFilter = setConsoleLevelFilter;
 window.filterTerminalLogs = filterTerminalLogs;
 
+/**
+ * RÈGLE 24 : Synchronisation 1-Tap des dernières fonctions sur le smartphone
+ * Purge les caches PWA (CacheStorage), met à jour le Service Worker et recharge la page
+ */
+async function forceSyncMobileUpdates() {
+  triggerHaptic();
+  showToast('Purge du cache PWA & synchronisation...', '🔄');
+  if ('caches' in window) {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    } catch {}
+  }
+  if ('serviceWorker' in navigator) {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of regs) {
+        await reg.update();
+      }
+    } catch {}
+  }
+  setTimeout(() => {
+    window.location.reload(true);
+  }, 500);
+}
+window.forceSyncMobileUpdates = forceSyncMobileUpdates;

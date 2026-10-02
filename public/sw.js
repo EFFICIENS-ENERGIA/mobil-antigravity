@@ -1,10 +1,11 @@
 // public/sw.js - Service Worker PWA Offline-First & Web Push Natif (W3C)
-const CACHE_NAME = 'agy-mobile-pilot-v2';
+const CACHE_NAME = 'agy-mobile-pilot-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/css/mobile.css',
   '/js/app.js',
+  '/js/components/github-build-card.js',
   '/manifest.webmanifest',
   '/icons/icon-192.svg',
   '/icons/icon-512.svg'
