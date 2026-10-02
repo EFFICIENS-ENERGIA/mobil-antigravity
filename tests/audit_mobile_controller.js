@@ -663,6 +663,51 @@ async function runFullAudit() {
     recordTest(33, 'Gestion Dynamique des Sessions Réseau', false, e.message);
   }
 
+  // TEST 34 : Déploiement Zero-Downtime 1-Tap Mobile (/api/deploy/trigger) & Validation Sécurisée Seb
+  try {
+    const deployRes = await requestHttp('POST', '/api/deploy/trigger', {
+      pin: '6567'
+    }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const deployData = JSON.parse(deployRes.body);
+    const valid = deployRes.statusCode === 200 && deployData.success === true && !!deployData.message;
+    recordTest(34, 'Déploiement Zero-Downtime 1-Tap Mobile (API /api/deploy/trigger & PIN 6567)', valid, `Code HTTP 200, Canal: [${deployData.channel}], Message: "${deployData.message.substring(0, 45)}..."`);
+  } catch (e) {
+    recordTest(34, 'Déploiement Zero-Downtime 1-Tap Mobile', false, e.message);
+  }
+
+  // TEST 35 : Simulation Événements GitHub & Barre de Progression SSE (/api/github/simulate)
+  try {
+    const simCommit = await requestHttp('POST', '/api/github/simulate', {
+      type: 'commit',
+      message: 'feat: test composant github-build-card-v2',
+      author: 'Sébastien (07 78 24 65 67)'
+    }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const simCommitData = JSON.parse(simCommit.body);
+
+    const simWf = await requestHttp('POST', '/api/github/simulate', {
+      type: 'workflow',
+      status: 'success'
+    }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const simWfData = JSON.parse(simWf.body);
+
+    const compFileExists = fs.existsSync(path.resolve('public/js/components/github-build-card.js'));
+    const compContent = compFileExists ? fs.readFileSync(path.resolve('public/js/components/github-build-card.js'), 'utf8') : '';
+    const compValid = compFileExists && compContent.includes('GitHubBuildCardV2') && compContent.includes('build_progress');
+
+    const valid = simCommit.statusCode === 200 && simCommitData.success === true &&
+                  simWf.statusCode === 200 && simWfData.success === true &&
+                  compValid;
+    recordTest(35, 'Composant PWA GitHub Build Card v2 & Progression SSE (/api/github/simulate)', valid, `Composant WebComponent actif (${compContent.length} o) • Événements SSE Commit & Workflow CI/CD relayés`);
+  } catch (e) {
+    recordTest(35, 'Composant PWA GitHub Build Card v2 & Progression SSE', false, e.message);
+  }
+
   // TEST 17 : Rendu Réel Navigateur Edge Chromium Headless (Lock Screen, Dashboard & Assistant Vocal)
   const edgePath = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
   const screenshotLock = path.join(CAPTURES_DIR, 'mobile_secure_lock_screen.png');

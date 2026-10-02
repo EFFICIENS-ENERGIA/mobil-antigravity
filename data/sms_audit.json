@@ -1,5 +1,95 @@
 [
   {
+    "id": "sms_1790954112751",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"Bâti-Excellence Pro\" lancé avec succès sur le port 8089 (http://192.168.1.76:8089). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:15:12.751Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954112724",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:15:12.724Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954111053",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:15:11.053Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954109498",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY KILL SWITCH] Tous les serveurs ont été arrêtés avec succès (3 services). Machine au repos.",
+    "trigger": "kill_switch",
+    "timestamp": "2026-10-02T15:15:09.498Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954109360",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY] Serveur \"SmartTrip Pro\" (Port 8080) arrêté depuis votre smartphone.",
+    "trigger": "project_stop",
+    "timestamp": "2026-10-02T15:15:09.360Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954109189",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "Test sécurité @AUD : Session chiffrée validée.",
+    "trigger": "smartphone_manual",
+    "timestamp": "2026-10-02T15:15:09.189Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954101328",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"Bâti-Excellence Pro\" lancé avec succès sur le port 8089 (http://192.168.1.76:8089). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:15:01.328Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954096214",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:14:56.214Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790954091059",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:14:51.058Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
     "id": "sms_1790953285685",
     "to": "+33778246567",
     "displayPhone": "07 78 24 65 67",
@@ -906,96 +996,6 @@
     "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
     "trigger": "project_launch",
     "timestamp": "2026-09-28T21:43:21.754Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631726533",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:42:06.533Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631711711",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🔴 [ANTIGRAVITY] Serveur \"SmartTrip Pro\" (Port 8080) arrêté depuis votre smartphone.",
-    "trigger": "project_stop",
-    "timestamp": "2026-09-28T21:41:51.711Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631711678",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
-    "trigger": "project_launch",
-    "timestamp": "2026-09-28T21:41:51.678Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631711483",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🟢 [ANTIGRAVITY] Projet \".agents\" lancé avec succès sur le port 8128 (http://192.168.1.76:8128). Accessible depuis votre smartphone.",
-    "trigger": "project_launch",
-    "timestamp": "2026-09-28T21:41:51.483Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631711392",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:41:51.392Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631706308",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🔴 [ANTIGRAVITY] Serveur \"SmartTrip Pro\" (Port 8080) arrêté depuis votre smartphone.",
-    "trigger": "project_stop",
-    "timestamp": "2026-09-28T21:41:46.308Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631706274",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
-    "trigger": "project_launch",
-    "timestamp": "2026-09-28T21:41:46.274Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631705968",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:41:45.968Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631629804",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:40:29.804Z",
     "status": "DELIVERED",
     "provider": "ANTIGRAVITY_SMS_GATEWAY"
   }

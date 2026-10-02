@@ -1361,6 +1361,9 @@ function initLogStream() {
   if (!authToken) return;
 
   eventSource = new EventSource(`/api/logs/stream?token=${encodeURIComponent(authToken)}`);
+  window.appSSE = eventSource;
+  window.dispatchEvent(new CustomEvent('sse_ready', { detail: eventSource }));
+
   const body = document.getElementById('terminal-body');
 
   eventSource.onmessage = (event) => {

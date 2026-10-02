@@ -28,5 +28,35 @@
     "requiresBiometricReauth": true,
     "createdAt": 1790953285732,
     "expiresAt": 1790956885732
+  },
+  "008e6467f8bde77f636b55f919a8568f3abda7a85e56e461.792eddf7e8b374120dd5cc8c73ce59b0bf410d3dac0bcf92b8199cff0c30ce5c": {
+    "token": "008e6467f8bde77f636b55f919a8568f3abda7a85e56e461.792eddf7e8b374120dd5cc8c73ce59b0bf410d3dac0bcf92b8199cff0c30ce5c",
+    "ip": "127.0.0.1",
+    "userAgent": "unknown",
+    "isLocal": true,
+    "networkType": "LOCAL_LAN",
+    "requiresBiometricReauth": false,
+    "createdAt": 1790954108012,
+    "expiresAt": 1791040508012
+  },
+  "02043cb710597d3111674a2f95df1e2cfbbaf491575ab158.5e549a806ca43592db6723a6e9e6dc7f371445130485f1948d41927747c2a90d": {
+    "token": "02043cb710597d3111674a2f95df1e2cfbbaf491575ab158.5e549a806ca43592db6723a6e9e6dc7f371445130485f1948d41927747c2a90d",
+    "ip": "127.0.0.1",
+    "userAgent": "Biometric-WebAuthn-Seb",
+    "isLocal": true,
+    "networkType": "LOCAL_LAN",
+    "requiresBiometricReauth": false,
+    "createdAt": 1790954109314,
+    "expiresAt": 1791040509314
+  },
+  "699a889a9178ea42b7962d468fc2d9a9ff814a94f0f78b0c.e59736aa457b39d487966acf264291c56b7211d268c123d7db60ee66691baa91": {
+    "token": "699a889a9178ea42b7962d468fc2d9a9ff814a94f0f78b0c.e59736aa457b39d487966acf264291c56b7211d268c123d7db60ee66691baa91",
+    "ip": "203.0.113.88",
+    "userAgent": "unknown",
+    "isLocal": false,
+    "networkType": "REMOTE_WAN_4G_5G",
+    "requiresBiometricReauth": true,
+    "createdAt": 1790954112908,
+    "expiresAt": 1790957712908
   }
 }
