@@ -1,5 +1,65 @@
 [
   {
+    "id": "sms_1790935810577",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY KILL SWITCH] Tous les serveurs ont été arrêtés avec succès (2 services). Machine au repos.",
+    "trigger": "kill_switch",
+    "timestamp": "2026-10-02T10:10:10.577Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790935803487",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T10:10:03.487Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790935803282",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "Test sécurité @AUD : Session chiffrée validée.",
+    "trigger": "smartphone_manual",
+    "timestamp": "2026-10-02T10:10:03.282Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790935429904",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY KILL SWITCH] Tous les serveurs ont été arrêtés avec succès (2 services). Machine au repos.",
+    "trigger": "kill_switch",
+    "timestamp": "2026-10-02T10:03:49.904Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790935420151",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T10:03:40.151Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790935419986",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "Test sécurité @AUD : Session chiffrée validée.",
+    "trigger": "smartphone_manual",
+    "timestamp": "2026-10-02T10:03:39.986Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
     "id": "sms_1790711585269",
     "to": "+33778246567",
     "displayPhone": "07 78 24 65 67",

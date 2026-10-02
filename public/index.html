@@ -76,7 +76,12 @@
         <span id="audio-toggle-icon">🔊</span>
         <span id="audio-toggle-text" style="font-size: 0.72rem; font-weight: 600;">Voix</span>
       </button>
-      <span class="security-status-badge">🔒 AES</span>
+      <button class="btn btn-secondary" id="morning-briefing-btn" style="width: auto; min-height: 32px; padding: 4px 8px; font-size: 0.75rem;" onclick="triggerMorningBriefing()" title="Morning Briefing Vocal">
+        ☀️
+      </button>
+      <button class="btn btn-secondary" id="oled-toggle-btn" style="width: auto; min-height: 32px; padding: 4px 8px; font-size: 0.75rem;" onclick="toggleOledMode()" title="Mode Nuit Profond OLED">
+        🌙
+      </button>
       <button class="btn btn-secondary" style="width: auto; min-height: 32px; padding: 4px 8px; font-size: 0.75rem;" onclick="logout()" title="Verrouiller la session">
         🔒
       </button>
@@ -92,8 +97,65 @@
 
     <!-- ONGLET 1 : PROJETS ANTIGRAVITY -->
     <section class="tab-pane active" id="tab-projects">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-        <h2 style="font-size: 1.1rem; font-weight: 700;">Projets Machine</h2>
+      <!-- WIDGET SANTÉ MATÉRIELLE PC HÔTE -->
+      <div class="hardware-widget" id="hardware-widget">
+        <div class="hardware-header">
+          <div class="hardware-title">
+            <span>💻</span>
+            <span>Santé Matérielle PC Hôte</span>
+          </div>
+          <span class="hardware-badge" id="hw-overall-badge">OPTIMAL</span>
+        </div>
+        <div class="hardware-grid">
+          <div class="hardware-stat-box">
+            <div class="hardware-stat-label">
+              <span>Processeur</span>
+              <span id="hw-cpu-cores">--</span>
+            </div>
+            <div class="hardware-stat-val" id="hw-cpu-val">--%</div>
+            <div class="hardware-meter">
+              <div class="hardware-meter-fill" id="hw-cpu-meter" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="hardware-stat-box">
+            <div class="hardware-stat-label">
+              <span>Mémoire RAM</span>
+              <span id="hw-ram-total">-- Go</span>
+            </div>
+            <div class="hardware-stat-val" id="hw-ram-val">--%</div>
+            <div class="hardware-meter">
+              <div class="hardware-meter-fill" id="hw-ram-meter" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="hardware-stat-box">
+            <div class="hardware-stat-label">
+              <span>Disque C:</span>
+              <span id="hw-disk-free">-- Go</span>
+            </div>
+            <div class="hardware-stat-val" id="hw-disk-val">--%</div>
+            <div class="hardware-meter">
+              <div class="hardware-meter-fill" id="hw-disk-meter" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECHERCHE & FILTRES INSTANTANÉS -->
+      <div class="search-filter-section">
+        <div class="search-input-wrapper">
+          <span class="search-input-icon">🔍</span>
+          <input type="text" id="project-search-input" class="project-search-input" placeholder="Rechercher un projet (SmartTrip, SaaS, Bâti...)" oninput="filterProjects()">
+        </div>
+        <div class="filter-chips-container">
+          <button class="filter-chip active" data-filter="all" onclick="setProjectFilter('all')">Tous</button>
+          <button class="filter-chip" data-filter="active" onclick="setProjectFilter('active')">🟢 En ligne</button>
+          <button class="filter-chip" data-filter="stopped" onclick="setProjectFilter('stopped')">⚪ Arrêtés</button>
+          <button class="filter-chip" data-filter="git" onclick="setProjectFilter('git')">💾 Git Actif</button>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; margin-top: 6px;">
+        <h2 style="font-size: 1.05rem; font-weight: 700;">Projets Antigravity</h2>
         <span class="badge badge-emerald" id="project-count-badge">Chargement...</span>
       </div>
 
@@ -120,6 +182,20 @@
     <!-- ONGLET 2 : PILOTAGE & ACTIONS RAPIDES -->
     <section class="tab-pane" id="tab-actions">
       <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Pilotage 1-Tap</h2>
+
+      <!-- KILL SWITCH D'URGENCE 1-TAP -->
+      <div class="glass-card action-card" style="border: 1px solid rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.08);">
+        <div class="card-header">
+          <div class="card-title" style="color: #fca5a5;">🔴 Kill Switch d'Urgence</div>
+          <span class="badge badge-rose">Arrêt Global</span>
+        </div>
+        <p style="font-size: 0.8rem; color: #fecaca; margin-bottom: 10px;">
+          Coupe instantanément tous les serveurs Node.js/Python en cours d'exécution sur votre PC hôte et envoie une confirmation par SMS.
+        </p>
+        <button class="btn btn-kill-switch" onclick="triggerKillSwitch()">
+          ⛔ ARRÊT D'URGENCE GLOBAL (1-TAP)
+        </button>
+      </div>
 
       <!-- ACCÈS 4G/5G HORS DOMICILE -->
       <div class="glass-card remote-access-card" id="remote-tunnel-card">
@@ -226,6 +302,19 @@
 
       <div class="glass-card action-card">
         <div class="card-header">
+          <div class="card-title">💾 Snapshot Git 1-Tap</div>
+          <span class="badge badge-emerald">GitHub Auto-Sync</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+          Commit automatique horodaté et Push immédiat sur GitHub pour sécuriser vos avancées nomades.
+        </p>
+        <button class="btn btn-outline-emerald" onclick="triggerSnapshot('mobil antigravity')">
+          💾 Snapshot & Push GitHub (Mobil AGY)
+        </button>
+      </div>
+
+      <div class="glass-card action-card">
+        <div class="card-header">
           <div class="card-title">⚖️ Intégrité & Règles Antigravity</div>
           <span class="badge badge-emerald">Règles 00 à 18</span>
         </div>
@@ -233,6 +322,40 @@
         <button class="btn btn-secondary" onclick="triggerAction('check_rules')">
           ⚖️ Vérifier les 18 Règles
         </button>
+      </div>
+    </section>
+
+    <!-- ONGLET 2B : CARNET DE TÂCHES MULTI-AGENTS -->
+    <section class="tab-pane" id="tab-tasks">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <h2 style="font-size: 1.05rem; font-weight: 700;">Carnet d'Ordres IA</h2>
+        <span class="badge badge-emerald" id="tasks-count-badge">0 tâche</span>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 14px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-light); margin-bottom: 8px;">
+          ➕ Assigner une tâche à l'équipe
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <input type="text" id="new-task-input" placeholder="Ex: Audit sécurité de SmartTrip Pro..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 8px; color: #fff; font-size: 0.85rem; outline: none;">
+          <div style="display: flex; gap: 6px;">
+            <select id="new-task-assignee" style="flex: 1; padding: 8px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-glass); border-radius: 8px; color: #fff; font-size: 0.78rem;">
+              <option value="@CE">@CE (Chef d'Équipe)</option>
+              <option value="@DEV">@DEV (Lead Dev)</option>
+              <option value="@UIX">@UIX (Design System)</option>
+              <option value="@AUD">@AUD (Auditeur QA)</option>
+              <option value="@OPS">@OPS (DevOps)</option>
+              <option value="@DOC">@DOC (Tech Writer)</option>
+            </select>
+            <button class="btn btn-primary" style="width: auto; min-height: 36px; padding: 0 16px; font-size: 0.8rem;" onclick="handleAddTaskSubmit()">
+              Ajouter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tasks-list-container">
+        <!-- Tâches injectées dynamiquement -->
       </div>
     </section>
 
@@ -360,6 +483,10 @@
     <button class="nav-item active" data-tab="projects">
       <span class="nav-icon">📂</span>
       <span>Projets</span>
+    </button>
+    <button class="nav-item" data-tab="tasks">
+      <span class="nav-icon">📝</span>
+      <span>Tâches</span>
     </button>
     <button class="nav-item" data-tab="actions">
       <span class="nav-icon">⚡</span>

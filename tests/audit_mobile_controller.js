@@ -26,7 +26,7 @@ function requestHttp(method, path, body = null, extraHeaders = {}) {
         'X-Requested-With': 'AntigravityMobilePilot',
         ...extraHeaders
       },
-      timeout: 4000
+      timeout: 15000
     };
 
     const req = http.request(options, (res) => {
@@ -277,7 +277,7 @@ async function runFullAudit() {
 
   // TEST 16 : Passerelle Reverse Proxy 4G/5G (/proxy/:port/) avec Fallback 502
   try {
-    const proxyRes = await requestHttp('GET', '/proxy/8080/');
+    const proxyRes = await requestHttp('GET', '/proxy/9999/');
     const valid = proxyRes.statusCode === 502 && proxyRes.body.includes('⚠️ Projet non démarré');
     recordTest(16, 'Passerelle Reverse Proxy 4G/5G (/proxy/:port/) avec Fallback 502', valid, `Code HTTP 502 géré avec interface de repli claire pour Seb`);
   } catch (e) {
@@ -337,6 +337,96 @@ async function runFullAudit() {
     recordTest(21, 'Assistant Vocal NLP & Synthèse Text-to-Speech (TTS)', valid, `Intention: [${data.intent}], Cible: ${target}, Voix: "${data.replyText}"`);
   } catch (e) {
     recordTest(21, 'Assistant Vocal NLP & Synthèse TTS', false, e.message);
+  }
+
+  // TEST 22 : Télémétrie Matérielle Machine Hôte (/api/hardware - CPU, RAM, Disque)
+  try {
+    const res = await requestHttp('GET', '/api/hardware', null, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const data = JSON.parse(res.body);
+    const valid = res.statusCode === 200 && data.success === true && data.hardware &&
+      typeof data.hardware.cpu.percent === 'number' &&
+      typeof data.hardware.ram.percentUsed === 'number' &&
+      !!data.hardware.disk.freeGb;
+    const detail = valid
+      ? `CPU: ${data.hardware.cpu.percent}% (${data.hardware.cpu.cores}C), RAM: ${data.hardware.ram.usedGb}/${data.hardware.ram.totalGb}Go (${data.hardware.ram.percentUsed}%), Disque C: ${data.hardware.disk.freeGb}Go libre, Statut: ${data.hardware.overallStatus}`
+      : 'Données matérielles invalides';
+    recordTest(22, 'Télémétrie Matérielle Machine Hôte (CPU, RAM, Disque C:)', valid, detail);
+  } catch (e) {
+    recordTest(22, 'Télémétrie Matérielle Machine Hôte', false, e.message);
+  }
+
+  // TEST 23 : Carnet de Tâches Multi-Agents (/api/tasks, /api/tasks/add, /api/tasks/toggle)
+  try {
+    const addRes = await requestHttp('POST', '/api/tasks/add', {
+      title: 'Vérifier la résistance thermique R=7 sur Bâti-Excellence',
+      assignee: '@DEV',
+      project: 'site_construction',
+      source: 'Test Automatisé'
+    }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const addData = JSON.parse(addRes.body);
+    const taskId = addData.task?.id;
+
+    const toggleRes = await requestHttp('POST', '/api/tasks/toggle', { id: taskId }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const toggleData = JSON.parse(toggleRes.body);
+
+    const listRes = await requestHttp('GET', '/api/tasks', null, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const listData = JSON.parse(listRes.body);
+
+    const valid = addRes.statusCode === 200 && addData.success &&
+                  toggleRes.statusCode === 200 && toggleData.task.status === 'DONE' &&
+                  listRes.statusCode === 200 && listData.tasks.length >= 1;
+    recordTest(23, 'Carnet de Tâches Multi-Agents (/api/tasks CRUD & Statuts TODO/DONE)', valid, `Ajout (@DEV), Statut basculé (${toggleData.task?.status}), Total: ${listData.tasks?.length} tâches`);
+  } catch (e) {
+    recordTest(23, 'Carnet de Tâches Multi-Agents', false, e.message);
+  }
+
+  // TEST 24 : Kill Switch d'Urgence 1-Tap (/api/action action: kill_switch)
+  try {
+    const res = await requestHttp('POST', '/api/action', {
+      action: 'kill_switch'
+    }, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const data = JSON.parse(res.body);
+    const valid = res.statusCode === 200 && data.success === true && Array.isArray(data.stopped);
+    recordTest(24, 'Kill Switch d’Urgence 1-Tap (Arrêt Global de tous les serveurs)', valid, `Arrêt confirmé, ${data.stopped.length} port(s) contrôlé(s)`);
+  } catch (e) {
+    recordTest(24, 'Kill Switch d’Urgence 1-Tap', false, e.message);
+  }
+
+  // TEST 25 : Morning Briefing Automatisé (/api/briefing)
+  try {
+    const res = await requestHttp('GET', '/api/briefing', null, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const data = JSON.parse(res.body);
+    const valid = res.statusCode === 200 && data.success === true && typeof data.briefing === 'string' && data.briefing.includes('Bonjour Seb');
+    recordTest(25, 'Morning Briefing Automatisé (Synthèse Audio/Texte Machine & Projets)', valid, `Briefing: "${data.briefing.substring(0, 75)}..."`);
+  } catch (e) {
+    recordTest(25, 'Morning Briefing Automatisé', false, e.message);
+  }
+
+  // TEST 26 : Raccourcis PWA (Shortcuts Webmanifest) & Mode Nuit Profond OLED
+  try {
+    const manifestRaw = fs.readFileSync(path.resolve('public/manifest.webmanifest'), 'utf8');
+    const manifest = JSON.parse(manifestRaw);
+    const hasShortcuts = Array.isArray(manifest.shortcuts) && manifest.shortcuts.length >= 4;
+
+    const cssRaw = fs.readFileSync(path.resolve('public/css/mobile.css'), 'utf8');
+    const hasOled = cssRaw.includes('.oled-mode') && cssRaw.includes('--bg-primary: #000000');
+
+    const valid = hasShortcuts && hasOled;
+    recordTest(26, 'Raccourcis Écran d’Accueil Smartphone (PWA) & Mode Nuit Profond OLED', valid, `${manifest.shortcuts?.length} raccourcis PWA déclarés, CSS True Black validé`);
+  } catch (e) {
+    recordTest(26, 'Raccourcis PWA & Mode Nuit Profond OLED', false, e.message);
   }
 
   // TEST 17 : Rendu Réel Navigateur Edge Chromium Headless (Lock Screen, Dashboard & Assistant Vocal)

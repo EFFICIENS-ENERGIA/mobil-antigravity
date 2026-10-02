@@ -1,0 +1,50 @@
+[
+  {
+    "id": "task_1790935810523_drd",
+    "title": "Vérifier la résistance thermique R=7 sur Bâti-Excellence",
+    "assignee": "@DEV",
+    "project": "site_construction",
+    "status": "DONE",
+    "createdAt": "2026-10-02T10:10:10.523Z",
+    "source": "Test Automatisé",
+    "completedAt": "2026-10-02T10:10:10.535Z"
+  },
+  {
+    "id": "task_1790935429828_5w7",
+    "title": "Vérifier la résistance thermique R=7 sur Bâti-Excellence",
+    "assignee": "@DEV",
+    "project": "site_construction",
+    "status": "DONE",
+    "createdAt": "2026-10-02T10:03:49.828Z",
+    "source": "Test Automatisé",
+    "completedAt": "2026-10-02T10:03:49.842Z"
+  },
+  {
+    "id": "task_001",
+    "title": "Surveillance et audit de sécurité continu OWASP Top 10",
+    "assignee": "@AUD",
+    "project": "mobil antigravity",
+    "status": "DONE",
+    "createdAt": "2026-10-02T09:03:15.503Z",
+    "completedAt": "2026-10-02T10:03:15.505Z",
+    "source": "system"
+  },
+  {
+    "id": "task_002",
+    "title": "Optimisation de la vitesse de chargement et réactivité 4G/5G",
+    "assignee": "@DEV",
+    "project": "SAAS EFFICIENS ENERGIA",
+    "status": "TODO",
+    "createdAt": "2026-10-02T10:03:15.505Z",
+    "source": "Seb"
+  },
+  {
+    "id": "task_003",
+    "title": "Harmonisation du contraste d’accessibilité WCAG AA",
+    "assignee": "@UIX",
+    "project": "SmartTrip Pro",
+    "status": "TODO",
+    "createdAt": "2026-10-02T10:03:15.505Z",
+    "source": "Seb"
+  }
+]

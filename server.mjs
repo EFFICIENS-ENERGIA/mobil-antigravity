@@ -11,12 +11,16 @@ import {
   stopSaasServer, 
   launchProject,
   stopProject,
+  stopAllProjects,
+  snapshotProject,
   runProjectAudit, 
   getRunningProcesses, 
   logEmitter, 
   getRecentLogs,
   broadcastLog 
 } from './lib/process_manager.js';
+import { getHardwareTelemetry } from './lib/hardware_telemetry.js';
+import { getTasks, addTask, toggleTask, deleteTask } from './lib/tasks_manager.js';
 import { sendSmsNotification, getSmsHistory, SEB_PHONE } from './lib/sms_notifier.js';
 import { isActionAllowed, sanitizePath, escapeHtml, isSafeCommandParam } from './lib/security_guard.js';
 import { printTerminalQr, generateQrSvg } from './lib/qr_generator.js';
@@ -422,6 +426,104 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // 10b. GET /api/hardware (Télémétrie Matérielle Machine Hôte - CPU, RAM, Disque C:)
+  if (req.method === 'GET' && pathname === '/api/hardware') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      hardware: getHardwareTelemetry()
+    }));
+    return;
+  }
+
+  // 10c. GET /api/tasks (Carnet de Tâches pour l'Équipe Multi-Agents)
+  if (req.method === 'GET' && pathname === '/api/tasks') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      tasks: getTasks()
+    }));
+    return;
+  }
+
+  // 10d. POST /api/tasks/add (Ajout de Tâche)
+  if (req.method === 'POST' && pathname === '/api/tasks/add') {
+    try {
+      const payload = await readJsonBody();
+      const created = addTask({
+        title: payload.title || payload.text,
+        assignee: payload.assignee || '@CE',
+        project: payload.project || 'Global',
+        source: payload.source || 'Seb Mobile'
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, task: created }));
+    } catch (e) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 10e. POST /api/tasks/toggle (Bascule statut TODO <-> DONE)
+  if (req.method === 'POST' && pathname === '/api/tasks/toggle') {
+    try {
+      const payload = await readJsonBody();
+      const updated = toggleTask(payload.id || payload.taskId);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: !!updated, task: updated }));
+    } catch (e) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 10f. POST /api/tasks/delete (Suppression de Tâche)
+  if (req.method === 'POST' && pathname === '/api/tasks/delete') {
+    try {
+      const payload = await readJsonBody();
+      const deleted = deleteTask(payload.id || payload.taskId);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: deleted }));
+    } catch (e) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 10g. GET /api/briefing (Morning Briefing Automatisé)
+  if (req.method === 'GET' && pathname === '/api/briefing') {
+    try {
+      const projs = await scanAntigravityProjects();
+      const onlineCount = projs.filter(p => p.isPortActive).length;
+      const hw = getHardwareTelemetry();
+      const tasks = getTasks();
+      const pendingTasks = tasks.filter(t => t.status !== 'DONE').length;
+      const briefText = `Bonjour Seb. PC hôte : processeur à ${hw.cpu.percent}%, mémoire à ${hw.ram.percentUsed}%, ${hw.disk.freeGb} Go libres sur le disque C. ${onlineCount} projet(s) en ligne sur ${projs.length}. ${pendingTasks} tâche(s) d'agents en attente. Tous les voyants sont au vert.`;
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        briefing: briefText,
+        hardware: hw,
+        onlineCount,
+        totalProjects: projs.length,
+        pendingTasks,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (e) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
   // 11. POST /api/voice/command (Assistant Vocal Intelligent)
   if (req.method === 'POST' && pathname === '/api/voice/command') {
     try {
@@ -462,6 +564,31 @@ const server = http.createServer(async (req, res) => {
             const projs = await scanAntigravityProjects();
             const online = projs.filter(p => p.isPortActive).length;
             executionResult = { success: true, count: projs.length, online };
+            break;
+          case 'kill_switch':
+            executionResult = await stopAllProjects();
+            break;
+          case 'morning_briefing':
+            const projsB = await scanAntigravityProjects();
+            const onB = projsB.filter(p => p.isPortActive).length;
+            const hwB = getHardwareTelemetry();
+            const tasksB = getTasks();
+            const pendingB = tasksB.filter(t => t.status !== 'DONE').length;
+            const briefVoice = `Bonjour Sébastien. Processeur à ${hwB.cpu.percent}%, mémoire à ${hwB.ram.percentUsed}%. ${onB} projet(s) en ligne sur ${projsB.length}. ${pendingB} tâche(s) d'agents en attente. Tous les voyants sont au vert.`;
+            executionResult = { success: true, briefing: briefVoice, hardware: hwB, onlineCount: onB, pendingTasks: pendingB };
+            parsed.replyText = briefVoice;
+            break;
+          case 'snapshot_project':
+            executionResult = await snapshotProject(parsed.targetProject || 'mobil antigravity');
+            break;
+          case 'get_hardware':
+            const hwH = getHardwareTelemetry();
+            executionResult = { success: true, hardware: hwH };
+            parsed.replyText = `Santé machine : Processeur à ${hwH.cpu.percent}%, RAM à ${hwH.ram.percentUsed}%, ${hwH.disk.freeGb} Go libres sur C:.`;
+            break;
+          case 'add_task':
+            const newTask = addTask(parsed.taskData || { title: transcript, assignee: '@CE', project: 'Global', source: 'Vocal Seb' });
+            executionResult = { success: true, task: newTask };
             break;
         }
       }
@@ -556,6 +683,33 @@ const server = http.createServer(async (req, res) => {
           break;
         case 'ping':
           result = { success: true, message: 'Pong sécurisé ! Connexion chiffrée active.' };
+          break;
+        case 'kill_switch':
+          result = await stopAllProjects();
+          break;
+        case 'snapshot_project':
+          result = await snapshotProject(payload.targetProject || 'mobil antigravity');
+          break;
+        case 'get_hardware':
+          result = { success: true, hardware: getHardwareTelemetry() };
+          break;
+        case 'morning_briefing':
+          const projsB = await scanAntigravityProjects();
+          const onB = projsB.filter(p => p.isPortActive).length;
+          const hwInfo = getHardwareTelemetry();
+          const taskList = getTasks();
+          const pendingCount = taskList.filter(t => t.status !== 'DONE').length;
+          const briefingMsg = `Bonjour Seb. PC hôte : CPU à ${hwInfo.cpu.percent}%, RAM à ${hwInfo.ram.percentUsed}%, ${hwInfo.disk.freeGb} Go libres sur C:. ${onB} projet(s) en ligne sur ${projsB.length}. ${pendingCount} tâche(s) d'agents en attente. Tout est sous contrôle.`;
+          result = { success: true, briefing: briefingMsg, hardware: hwInfo, onlineCount: onB, pendingTasks: pendingCount };
+          break;
+        case 'add_task':
+          result = { success: true, task: addTask(payload.taskData || { title: payload.title || payload.text, assignee: payload.assignee, project: payload.project, source: 'Seb Mobile' }) };
+          break;
+        case 'toggle_task':
+          result = { success: true, task: toggleTask(payload.id || payload.taskId) };
+          break;
+        case 'delete_task':
+          result = { success: true, deleted: deleteTask(payload.id || payload.taskId) };
           break;
         default:
           result = { success: false, message: 'Action non implémentée.' };

@@ -7,6 +7,10 @@ let deferredPrompt = null;
 let authToken = localStorage.getItem('agy_token') || '';
 let enteredPin = '';
 let audioEnabled = localStorage.getItem('agy_audio_enabled') !== 'false';
+let allProjects = [];
+let currentProjectFilter = 'all';
+let projectSearchQuery = '';
+let allTasks = [];
 
 // Initialisation au chargement du DOM
 document.addEventListener('DOMContentLoaded', async () => {
@@ -16,6 +20,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   initKeypad();
   initAudioVoices();
   updateAudioToggleUI();
+
+  // Initialisation du mode nuit OLED
+  const isOled = localStorage.getItem('agy_oled_mode') === 'true';
+  if (isOled) {
+    document.body.classList.add('oled-mode');
+    const oledBtn = document.getElementById('oled-toggle-btn');
+    if (oledBtn) oledBtn.textContent = '☀️';
+  }
 
   // 1. Vérification d'un jeton d'appairage rapide 1-clic dans l'URL (?pair=...)
   const urlParams = new URLSearchParams(window.location.search);
@@ -29,12 +41,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     showLockScreen();
   }
 
-  // Actualisation périodique si authentifié
+  // 2. Gestion des Raccourcis PWA (PWA Shortcuts) : ?open=voice, ?open=kill_switch, ?open=audit, ?open=saas
+  const openAction = urlParams.get('open');
+  if (openAction) {
+    setTimeout(() => {
+      if (openAction === 'voice') toggleVoiceAssistant();
+      else if (openAction === 'kill_switch') triggerKillSwitch();
+      else if (openAction === 'audit') triggerProjectAudit('mobil antigravity');
+      else if (openAction === 'saas') triggerAction('start_saas_server');
+    }, 800);
+  }
+
+  // Actualisation périodique si authentifié (Projets & Télémétrie)
   setInterval(() => {
     if (authToken) {
       loadProjects();
+      loadHardwareTelemetry();
     }
-  }, 10000);
+  }, 8000);
 });
 
 /**
@@ -269,6 +293,8 @@ function logout() {
 function onAuthenticated() {
   loadStatus();
   loadProjects();
+  loadHardwareTelemetry();
+  loadTasks();
   initLogStream();
   loadSmsHistory();
   loadSecurityEvents();
@@ -587,141 +613,246 @@ function closeAuditModal() {
  * Chargement et affichage des projets ANTIGRAVITY réels avec Télémétrie Santé & Git en Direct
  */
 async function loadProjects() {
-  const container = document.getElementById('projects-list');
-  if (!container || !authToken) return;
+  if (!authToken) return;
 
   try {
     const res = await secureFetch('/api/projects');
     const data = await res.json();
 
-    if (!data.success || !data.projects || data.projects.length === 0) {
-      container.innerHTML = `
-        <div class="glass-card" style="text-align: center; color: var(--text-muted);">
-          <p>Aucun projet détecté dans ANTIGRAVITY.</p>
-        </div>`;
-      return;
+    if (data.success && Array.isArray(data.projects)) {
+      allProjects = data.projects;
+      renderFilteredProjects();
     }
+  } catch (err) {
+    console.error('Erreur chargement projets:', err);
+  }
+}
 
-    container.innerHTML = data.projects.map(proj => {
-      let badgeClass = 'badge-gray';
-      if (proj.status === 'RUNNING') badgeClass = 'badge-emerald';
-      else if (proj.status === 'TESTED') badgeClass = 'badge-blue';
-      else if (proj.statusColor === 'amber') badgeClass = 'badge-amber';
+/**
+ * Filtrage des projets par recherche textuelle
+ */
+function filterProjects() {
+  const input = document.getElementById('project-search-input');
+  if (input) {
+    projectSearchQuery = input.value.trim().toLowerCase();
+    renderFilteredProjects();
+  }
+}
 
-      let icon = '📁';
-      const lower = proj.name.toLowerCase();
-      if (lower.includes('saas') || lower.includes('rdv_hub')) icon = '⚡';
-      else if (lower.includes('smarttrip') || lower.includes('homeagy')) icon = '✈️';
-      else if (lower.includes('construction') || lower.includes('bati')) icon = '🏗️';
-      else if (lower.includes('mobil')) icon = '📱';
-      else if (lower.includes('webtoon') || lower.includes('plume')) icon = '🎨';
+/**
+ * Filtrage des projets par puce (Tous, Actifs, Arrêtés, Git)
+ */
+function setProjectFilter(filterName) {
+  triggerHaptic();
+  currentProjectFilter = filterName;
 
-      const safeName = escapeHtml(proj.name);
-      const appUrl = proj.projectUrl || `http://${window.location.hostname}:${proj.defaultPort}`;
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.filter === filterName);
+  });
 
-      // Télémétrie Git
-      const git = proj.gitTelemetry || {
-        initialized: proj.hasGit,
-        commitHash: 'init',
-        message: proj.lastCommit || 'Actif',
-        author: 'Seb',
-        relativeDate: 'récent',
-        branch: 'main'
-      };
+  renderFilteredProjects();
+}
 
-      // Télémétrie Santé
-      const health = proj.health || {
-        status: proj.status,
-        latencyMs: proj.latencyMs || null,
-        estimatedRamMb: 35,
-        healthScore: '95%',
-        rulesScore: '18/18 Règles Conformes'
-      };
+/**
+ * Rendu visuel de la liste filtrée des projets
+ */
+function renderFilteredProjects() {
+  const container = document.getElementById('projects-list');
+  if (!container) return;
 
-      const latencyText = proj.isPortActive
-        ? (proj.latencyMs ? `${proj.latencyMs}ms` : '1ms')
-        : 'Arrêté';
+  let filtered = allProjects.slice();
 
-      const qaScore = proj.tests && proj.tests.score ? proj.tests.score : '100% PASS';
+  // 1. Filtre par recherche textuelle
+  if (projectSearchQuery) {
+    filtered = filtered.filter(p => 
+      (p.name && p.name.toLowerCase().includes(projectSearchQuery)) ||
+      (p.displayName && p.displayName.toLowerCase().includes(projectSearchQuery)) ||
+      (p.lastCommit && p.lastCommit.toLowerCase().includes(projectSearchQuery))
+    );
+  }
 
-      return `
-        <div class="glass-card" id="card-${proj.id}">
-          <div class="card-header">
-            <div class="card-title">
-              <span>${icon}</span>
-              <span>${escapeHtml(proj.displayName || proj.name)}</span>
-            </div>
-            <span class="badge ${badgeClass}">${proj.statusLabel}</span>
+  // 2. Filtre par puce d'état
+  if (currentProjectFilter === 'active') {
+    filtered = filtered.filter(p => p.isPortActive || p.status === 'RUNNING');
+  } else if (currentProjectFilter === 'stopped') {
+    filtered = filtered.filter(p => !p.isPortActive && p.status !== 'RUNNING');
+  } else if (currentProjectFilter === 'git') {
+    filtered = filtered.filter(p => p.hasGit);
+  }
+
+  const countBadge = document.getElementById('project-count-badge');
+  if (countBadge) {
+    countBadge.textContent = `${filtered.length} / ${allProjects.length} projets`;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="glass-card" style="text-align: center; color: var(--text-muted); padding: 24px;">
+        <p style="font-size: 0.9rem;">🔍 Aucun projet ne correspond à vos critères.</p>
+        <button class="btn btn-secondary" style="margin-top: 10px; width: auto; font-size: 0.78rem;" onclick="resetProjectFilters()">
+          Réinitialiser les filtres
+        </button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(proj => {
+    let badgeClass = 'badge-gray';
+    if (proj.status === 'RUNNING' || proj.isPortActive) badgeClass = 'badge-emerald';
+    else if (proj.status === 'TESTED') badgeClass = 'badge-blue';
+    else if (proj.statusColor === 'amber') badgeClass = 'badge-amber';
+
+    let icon = '📁';
+    const lower = proj.name.toLowerCase();
+    if (lower.includes('saas') || lower.includes('rdv_hub')) icon = '⚡';
+    else if (lower.includes('smarttrip') || lower.includes('homeagy')) icon = '✈️';
+    else if (lower.includes('construction') || lower.includes('bati')) icon = '🏗️';
+    else if (lower.includes('mobil')) icon = '📱';
+    else if (lower.includes('webtoon') || lower.includes('plume')) icon = '🎨';
+
+    const safeName = escapeHtml(proj.name);
+    const appUrl = proj.projectUrl || `http://${window.location.hostname}:${proj.defaultPort}`;
+
+    // Télémétrie Git
+    const git = proj.gitTelemetry || {
+      initialized: proj.hasGit,
+      commitHash: 'init',
+      message: proj.lastCommit || 'Actif',
+      author: 'Seb',
+      relativeDate: 'récent',
+      branch: 'main',
+      recentCommits: []
+    };
+
+    // Télémétrie Santé
+    const health = proj.health || {
+      status: proj.status,
+      latencyMs: proj.latencyMs || null,
+      estimatedRamMb: 35,
+      healthScore: '95%',
+      rulesScore: '18/18 Règles Conformes'
+    };
+
+    const latencyText = proj.isPortActive
+      ? (proj.latencyMs ? `${proj.latencyMs}ms` : '1ms')
+      : 'Arrêté';
+
+    const qaScore = proj.tests && proj.tests.score ? proj.tests.score : '100% PASS';
+
+    return `
+      <div class="glass-card" id="card-${proj.id}">
+        <div class="card-header">
+          <div class="card-title">
+            <span>${icon}</span>
+            <span>${escapeHtml(proj.displayName || proj.name)}</span>
+          </div>
+          <span class="badge ${badgeClass}">${proj.statusLabel}</span>
+        </div>
+
+        <!-- Bulle de Télémétrie Git en direct -->
+        <div class="git-bubble">
+          <div class="git-bubble-header">
+            <span class="git-branch-tag">🌿 ${escapeHtml(git.branch || 'main')}</span>
+            <span class="git-commit-hash">${escapeHtml(git.commitHash || 'git')}</span>
+          </div>
+          <div class="git-message" title="${escapeHtml(git.message || 'Projet à jour')}">${escapeHtml(git.message || 'Projet synchronisé')}</div>
+          <div class="git-meta">
+            <span>👤 ${escapeHtml(git.author || 'Seb')}</span>
+            <span>🕒 ${escapeHtml(git.relativeDate || 'récemment')}</span>
           </div>
 
-          <!-- Bulle de Télémétrie Git en direct -->
-          <div class="git-bubble">
-            <div class="git-bubble-header">
-              <span class="git-branch-tag">🌿 ${escapeHtml(git.branch || 'main')}</span>
-              <span class="git-commit-hash">${escapeHtml(git.commitHash || 'git')}</span>
-            </div>
-            <div class="git-message" title="${escapeHtml(git.message || 'Projet à jour')}">${escapeHtml(git.message || 'Projet synchronisé')}</div>
-            <div class="git-meta">
-              <span>👤 ${escapeHtml(git.author || 'Seb')}</span>
-              <span>🕒 ${escapeHtml(git.relativeDate || 'récemment')}</span>
-            </div>
-          </div>
-
-          <!-- Grille des Métriques de Santé -->
-          <div class="card-telemetry-grid">
-            <div class="telemetry-chip">
-              <span class="telemetry-label">RÉSEAU</span>
-              <span class="telemetry-val ${proj.isPortActive ? 'highlight-emerald' : ''}">
-                ${proj.isPortActive ? '🟢 ' + latencyText : '⚪ Inactif'}
-              </span>
-            </div>
-            <div class="telemetry-chip">
-              <span class="telemetry-label">MÉMOIRE</span>
-              <span class="telemetry-val highlight-blue">
-                ~${health.estimatedRamMb || 35} Mo
-              </span>
-            </div>
-            <div class="telemetry-chip">
-              <span class="telemetry-label">SCORE @AUD</span>
-              <span class="telemetry-val highlight-emerald">
-                🛡️ ${escapeHtml(qaScore)}
-              </span>
-            </div>
-          </div>
-
-          ${proj.isPortActive ? `
-            <div style="margin-bottom: 8px; padding: 6px 10px; background: rgba(16, 185, 129, 0.12); border: 1px solid var(--border-emerald); border-radius: 8px; font-size: 0.76rem; display: flex; align-items: center; justify-content: space-between;">
-              <span style="color: var(--emerald-light); font-weight: 600;">⚡ En direct :</span>
-              <a href="${appUrl}" target="_blank" rel="noopener noreferrer" style="color: #fff; font-family: var(--font-mono); text-decoration: underline;">Port ${proj.defaultPort} ↗</a>
+          <!-- Tiroir Déroulant des 5 Derniers Commits Git -->
+          ${git.recentCommits && git.recentCommits.length > 0 ? `
+            <button class="commit-drawer-toggle" onclick="toggleCommitDrawer('${proj.id}')">
+              📜 Voir l'historique des commits (▼)
+            </button>
+            <div class="commit-list-accordion" id="commits-${proj.id}" style="display: none;">
+              ${git.recentCommits.map(c => `
+                <div class="commit-history-item">
+                  <span class="commit-hash-badge">${escapeHtml(c.hash)}</span>
+                  <span class="commit-history-msg" title="${escapeHtml(c.message)}">${escapeHtml(c.message)}</span>
+                </div>
+              `).join('')}
             </div>
           ` : ''}
+        </div>
 
-          <div class="btn-grid">
-            ${proj.isPortActive ? `
-              <a href="${appUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                🌐 Ouvrir
-              </a>
-              <button class="btn btn-danger" onclick="triggerAction('stop_project', '${safeName}')">
-                🔴 Arrêter (${proj.defaultPort || ''})
-              </button>
-              <button class="btn btn-audit-tap" onclick="triggerProjectAudit('${safeName}', this)">
-                🛡️ Audit @AUD
-              </button>
-            ` : `
-              <button class="btn btn-primary" onclick="triggerAction('launch_project', '${safeName}')">
-                🟢 Lancer (${proj.defaultPort ? 'Port ' + proj.defaultPort : 'Web'})
-              </button>
-              <button class="btn btn-audit-tap" onclick="triggerProjectAudit('${safeName}', this)">
-                🛡️ Audit @AUD
-              </button>
-            `}
-            <button class="btn btn-secondary" onclick="triggerAction('check_rules')">
-              ⚖️ Règles
-            </button>
+        <!-- Grille des Métriques de Santé -->
+        <div class="card-telemetry-grid">
+          <div class="telemetry-chip">
+            <span class="telemetry-label">RÉSEAU</span>
+            <span class="telemetry-val ${proj.isPortActive ? 'highlight-emerald' : ''}">
+              ${proj.isPortActive ? '🟢 ' + latencyText : '⚪ Inactif'}
+            </span>
+          </div>
+          <div class="telemetry-chip">
+            <span class="telemetry-label">MÉMOIRE</span>
+            <span class="telemetry-val highlight-blue">
+              ~${health.estimatedRamMb || 35} Mo
+            </span>
+          </div>
+          <div class="telemetry-chip">
+            <span class="telemetry-label">SCORE @AUD</span>
+            <span class="telemetry-val highlight-emerald">
+              🛡️ ${escapeHtml(qaScore)}
+            </span>
           </div>
         </div>
-      `;
-    }).join('');
+
+        ${proj.isPortActive ? `
+          <div style="margin-bottom: 8px; padding: 6px 10px; background: rgba(16, 185, 129, 0.12); border: 1px solid var(--border-emerald); border-radius: 8px; font-size: 0.76rem; display: flex; align-items: center; justify-content: space-between;">
+            <span style="color: var(--emerald-light); font-weight: 600;">⚡ En direct :</span>
+            <a href="${appUrl}" target="_blank" rel="noopener noreferrer" style="color: #fff; font-family: var(--font-mono); text-decoration: underline;">Port ${proj.defaultPort} ↗</a>
+          </div>
+        ` : ''}
+
+        <div class="btn-grid">
+          ${proj.isPortActive ? `
+            <a href="${appUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              🌐 Ouvrir
+            </a>
+            <button class="btn btn-danger" onclick="triggerAction('stop_project', '${safeName}')">
+              🔴 Arrêter (${proj.defaultPort || ''})
+            </button>
+            <button class="btn btn-audit-tap" onclick="triggerProjectAudit('${safeName}', this)">
+              🛡️ Audit @AUD
+            </button>
+          ` : `
+            <button class="btn btn-primary" onclick="triggerAction('launch_project', '${safeName}')">
+              🟢 Lancer (${proj.defaultPort ? 'Port ' + proj.defaultPort : 'Web'})
+            </button>
+            <button class="btn btn-audit-tap" onclick="triggerProjectAudit('${safeName}', this)">
+              🛡️ Audit @AUD
+            </button>
+          `}
+          <button class="btn btn-outline-emerald" onclick="triggerSnapshot('${safeName}')" title="Snapshot Git 1-Tap">
+            💾 Snapshot Git
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function resetProjectFilters() {
+  projectSearchQuery = '';
+  currentProjectFilter = 'all';
+  const input = document.getElementById('project-search-input');
+  if (input) input.value = '';
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.filter === 'all');
+  });
+  renderFilteredProjects();
+}
+
+function toggleCommitDrawer(projId) {
+  triggerHaptic();
+  const el = document.getElementById(`commits-${projId}`);
+  if (el) {
+    const isHidden = el.style.display === 'none';
+    el.style.display = isHidden ? 'flex' : 'none';
+  }
+}
 
     const countBadge = document.getElementById('project-count-badge');
     if (countBadge) countBadge.textContent = `${data.projects.length} projets`;
@@ -1156,6 +1287,280 @@ async function executeVoiceCommandText(text) {
   }
 }
 
+/**
+ * TÉLÉMÉTRIE MATÉRIELLE MACHINE HÔTE (CPU, RAM, DISQUE)
+ */
+async function loadHardwareTelemetry() {
+  if (!authToken) return;
+
+  try {
+    const res = await secureFetch('/api/hardware');
+    const data = await res.json();
+
+    if (data.success && data.hardware) {
+      const hw = data.hardware;
+      
+      const cpuVal = document.getElementById('hw-cpu-val');
+      const cpuMeter = document.getElementById('hw-cpu-meter');
+      const cpuCores = document.getElementById('hw-cpu-cores');
+      if (cpuVal) cpuVal.textContent = `${hw.cpu.percent}%`;
+      if (cpuMeter) {
+        cpuMeter.style.width = `${hw.cpu.percent}%`;
+        cpuMeter.className = 'hardware-meter-fill' + (hw.cpu.percent > 85 ? ' danger' : (hw.cpu.percent > 65 ? ' warning' : ''));
+      }
+      if (cpuCores) cpuCores.textContent = `${hw.cpu.cores} Cœurs`;
+
+      const ramVal = document.getElementById('hw-ram-val');
+      const ramMeter = document.getElementById('hw-ram-meter');
+      const ramTotal = document.getElementById('hw-ram-total');
+      if (ramVal) ramVal.textContent = `${hw.ram.percentUsed}%`;
+      if (ramMeter) {
+        ramMeter.style.width = `${hw.ram.percentUsed}%`;
+        ramMeter.className = 'hardware-meter-fill' + (hw.ram.percentUsed > 85 ? ' danger' : (hw.ram.percentUsed > 70 ? ' warning' : ''));
+      }
+      if (ramTotal) ramTotal.textContent = `${hw.ram.usedGb}/${hw.ram.totalGb} Go`;
+
+      const diskVal = document.getElementById('hw-disk-val');
+      const diskMeter = document.getElementById('hw-disk-meter');
+      const diskFree = document.getElementById('hw-disk-free');
+      if (diskVal) diskVal.textContent = `${hw.disk.percentUsed}%`;
+      if (diskMeter) {
+        diskMeter.style.width = `${hw.disk.percentUsed}%`;
+        diskMeter.className = 'hardware-meter-fill' + (hw.disk.percentUsed > 90 ? ' danger' : (hw.disk.percentUsed > 75 ? ' warning' : ''));
+      }
+      if (diskFree) diskFree.textContent = `${hw.disk.freeGb} Go libre`;
+
+      const badge = document.getElementById('hw-overall-badge');
+      if (badge) {
+        badge.textContent = hw.overallStatus;
+        badge.className = `hardware-badge ${hw.overallStatus}`;
+      }
+    }
+  } catch (err) {
+    console.warn('Erreur télémétrie matérielle:', err);
+  }
+}
+
+/**
+ * CARNET DE TÂCHES MULTI-AGENTS
+ */
+async function loadTasks() {
+  const container = document.getElementById('tasks-list-container');
+  if (!container || !authToken) return;
+
+  try {
+    const res = await secureFetch('/api/tasks');
+    const data = await res.json();
+
+    if (data.success && Array.isArray(data.tasks)) {
+      allTasks = data.tasks;
+      renderTasksList();
+    }
+  } catch (err) {
+    console.error('Erreur chargement tâches:', err);
+  }
+}
+
+function renderTasksList() {
+  const container = document.getElementById('tasks-list-container');
+  const countBadge = document.getElementById('tasks-count-badge');
+  if (!container) return;
+
+  if (countBadge) {
+    const pending = allTasks.filter(t => t.status !== 'DONE').length;
+    countBadge.textContent = `${pending} en attente (${allTasks.length} total)`;
+  }
+
+  if (allTasks.length === 0) {
+    container.innerHTML = `
+      <div class="glass-card" style="text-align: center; color: var(--text-muted); padding: 20px;">
+        <p>Aucune tâche en attente. Utilisez le formulaire ci-dessus ou la voix pour en assigner une.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = allTasks.map(t => {
+    const isDone = t.status === 'DONE';
+    return `
+      <div class="task-card ${isDone ? 'completed' : ''}" id="task-${t.id}">
+        <input type="checkbox" class="task-checkbox" ${isDone ? 'checked' : ''} onchange="toggleTask('${t.id}')">
+        <div class="task-content">
+          <div class="task-title">${escapeHtml(t.title)}</div>
+          <div class="task-meta">
+            <span class="task-agent-badge">${escapeHtml(t.assignee || '@CE')}</span>
+            <span>📂 ${escapeHtml(t.project || 'Global')}</span>
+            <span>🕒 ${new Date(t.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        </div>
+        <button class="task-delete-btn" onclick="deleteTask('${t.id}')" title="Supprimer la tâche">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function handleAddTaskSubmit() {
+  const input = document.getElementById('new-task-input');
+  const select = document.getElementById('new-task-assignee');
+  if (!input) return;
+
+  const text = input.value.trim();
+  if (!text) {
+    showToast('Veuillez entrer une description de tâche.', '⚠️');
+    return;
+  }
+
+  const assignee = select ? select.value : '@CE';
+  triggerHaptic();
+
+  try {
+    const res = await secureFetch('/api/tasks/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: text, assignee, source: 'Seb Mobile' })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      input.value = '';
+      showToast(`Tâche assignée à ${assignee} !`, '📝');
+      speakVoiceResponse(`Tâche enregistrée pour ${assignee}.`);
+      loadTasks();
+    }
+  } catch (err) {
+    showToast('Erreur ajout tâche.', '❌');
+  }
+}
+
+async function toggleTask(taskId) {
+  triggerHaptic();
+  try {
+    const res = await secureFetch('/api/tasks/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: taskId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadTasks();
+    }
+  } catch (err) {
+    showToast('Erreur mise à jour tâche.', '❌');
+  }
+}
+
+async function deleteTask(taskId) {
+  triggerHaptic();
+  try {
+    const res = await secureFetch('/api/tasks/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: taskId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Tâche retirée du carnet.', '🗑️');
+      loadTasks();
+    }
+  } catch (err) {
+    showToast('Erreur suppression tâche.', '❌');
+  }
+}
+
+/**
+ * KILL SWITCH D'URGENCE 1-TAP (ARRÊT GLOBAL)
+ */
+async function triggerKillSwitch() {
+  triggerHaptic();
+  if (!confirm("⚠️ Confirmation requise :\nVoulez-vous déclencher l'arrêt d'urgence de TOUS les serveurs ?")) {
+    return;
+  }
+
+  showToast("Arrêt d'urgence global en cours...", "🔴");
+
+  try {
+    const res = await secureFetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'kill_switch' })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast("Arrêt d'urgence terminé. Tous les serveurs sont coupés !", "🛑");
+      speakVoiceResponse("Arrêt d'urgence exécuté Seb. Tous les serveurs sont coupés et votre machine est au repos.");
+      setTimeout(loadProjects, 1000);
+      loadHardwareTelemetry();
+    } else {
+      showToast(data.error || "Erreur lors du Kill Switch", "❌");
+    }
+  } catch (err) {
+    showToast("Erreur communication arrêt d'urgence", "❌");
+  }
+}
+
+/**
+ * SNAPSHOT GIT 1-TAP (COMMIT & PUSH GITHUB)
+ */
+async function triggerSnapshot(projectName) {
+  triggerHaptic();
+  showToast(`Sauvegarde Git & Push en cours pour ${projectName}...`, '💾');
+
+  try {
+    const res = await secureFetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'snapshot_project', targetProject: projectName })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(data.message || 'Snapshot Git envoyé sur GitHub avec succès !', '✅');
+      speakVoiceResponse(`Sauvegarde Git terminée pour ${projectName}.`);
+      setTimeout(loadProjects, 1500);
+    } else {
+      showToast(data.error || 'Erreur sauvegarde Snapshot Git', '❌');
+    }
+  } catch (err) {
+    showToast('Erreur réseau Snapshot Git', '❌');
+  }
+}
+
+/**
+ * MORNING BRIEFING VOCAL AUTOMATISÉ
+ */
+async function triggerMorningBriefing() {
+  triggerHaptic();
+  showToast("Génération du Morning Briefing...", "☀️");
+
+  try {
+    const res = await secureFetch('/api/briefing');
+    const data = await res.json();
+
+    if (data.success && data.briefing) {
+      showToast("Morning Briefing généré !", "☀️");
+      speakVoiceResponse(data.briefing);
+    } else {
+      showToast("Erreur génération briefing", "❌");
+    }
+  } catch (err) {
+    showToast("Erreur réseau Morning Briefing", "❌");
+  }
+}
+
+/**
+ * BASCULE MODE NUIT PROFOND OLED (TRUE BLACK #000000)
+ */
+function toggleOledMode() {
+  triggerHaptic();
+  const isOled = document.body.classList.toggle('oled-mode');
+  localStorage.setItem('agy_oled_mode', String(isOled));
+
+  const oledBtn = document.getElementById('oled-toggle-btn');
+  if (oledBtn) oledBtn.textContent = isOled ? '☀️' : '🌙';
+
+  showToast(isOled ? 'Mode Nuit Profond OLED activé (True Black)' : 'Mode Standard réactivé', '🌙');
+}
+
 // Bindings globaux pour événements HTML
 window.triggerAction = triggerAction;
 window.triggerProjectAudit = triggerProjectAudit;
@@ -1173,3 +1578,14 @@ window.toggleVoiceAssistant = toggleVoiceAssistant;
 window.closeVoiceAssistant = closeVoiceAssistant;
 window.executeVoiceCommandText = executeVoiceCommandText;
 window.requestMicPermissionExplicitly = requestMicPermissionExplicitly;
+window.filterProjects = filterProjects;
+window.setProjectFilter = setProjectFilter;
+window.resetProjectFilters = resetProjectFilters;
+window.toggleCommitDrawer = toggleCommitDrawer;
+window.triggerKillSwitch = triggerKillSwitch;
+window.triggerSnapshot = triggerSnapshot;
+window.triggerMorningBriefing = triggerMorningBriefing;
+window.toggleOledMode = toggleOledMode;
+window.handleAddTaskSubmit = handleAddTaskSubmit;
+window.toggleTask = toggleTask;
+window.deleteTask = deleteTask;

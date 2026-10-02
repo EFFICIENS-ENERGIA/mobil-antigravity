@@ -1035,3 +1035,368 @@ body {
   50% { opacity: 0.6; transform: scale(1.08); filter: drop-shadow(0 0 10px var(--emerald-light)); }
 }
 
+/* ==========================================================================
+   MODE NUIT PROFOND OLED (TRUE BLACK #000000)
+   ========================================================================== */
+body.oled-mode {
+  --bg-primary: #000000 !important;
+  --bg-secondary: #050505 !important;
+  --bg-card: rgba(8, 8, 8, 0.95) !important;
+  --bg-glass: rgba(0, 0, 0, 0.95) !important;
+  --border-glass: rgba(255, 255, 255, 0.12) !important;
+  background-color: #000000 !important;
+}
+
+body.oled-mode .mobile-header,
+body.oled-mode .mobile-bottom-nav,
+body.oled-mode .modal-card,
+body.oled-mode .project-card,
+body.oled-mode .action-card,
+body.oled-mode .hardware-widget,
+body.oled-mode .task-card {
+  background: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+body.oled-mode .lock-screen-container {
+  background: #000000 !important;
+}
+
+/* ==========================================================================
+   WIDGET SANTÉ MATÉRIELLE PC HÔTE (CPU, RAM, DISQUE)
+   ========================================================================== */
+.hardware-widget {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hardware-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.hardware-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-main);
+}
+
+.hardware-badge {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--emerald-light);
+  border: 1px solid var(--border-emerald);
+}
+
+.hardware-badge.ALERT {
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--rose);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+.hardware-badge.MODERATE {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--amber);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.hardware-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hardware-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hardware-stat-label {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hardware-stat-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+}
+
+.hardware-meter {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.hardware-meter-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--emerald);
+  transition: width 0.4s ease, background 0.3s;
+}
+
+.hardware-meter-fill.warning {
+  background: var(--amber);
+}
+
+.hardware-meter-fill.danger {
+  background: var(--rose);
+}
+
+/* ==========================================================================
+   FILTRES & RECHERCHE INSTANTANÉE DE PROJETS
+   ========================================================================== */
+.search-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.project-search-input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+  padding: 9px 12px 9px 34px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.project-search-input:focus {
+  border-color: var(--emerald);
+}
+
+.filter-chips-container {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.filter-chips-container::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.filter-chip.active {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: var(--border-emerald);
+  color: var(--emerald-light);
+}
+
+/* ==========================================================================
+   BOUTON KILL SWITCH D'URGENCE (ARRÊT GLOBAL)
+   ========================================================================== */
+.btn-kill-switch {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-kill-switch:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5);
+}
+
+/* ==========================================================================
+   CARNET DE TÂCHES MULTI-AGENTS
+   ========================================================================== */
+.task-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.task-card.completed {
+  opacity: 0.55;
+}
+
+.task-card.completed .task-title {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  accent-color: var(--emerald);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.task-content {
+  flex: 1;
+}
+
+.task-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.task-agent-badge {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.65rem;
+}
+
+.task-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.task-delete-btn:hover {
+  color: var(--rose);
+}
+
+/* ==========================================================================
+   HISTORIQUE DÉROULANT DES COMMITS GIT
+   ========================================================================== */
+.commit-drawer-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.commit-drawer-toggle:hover {
+  color: var(--emerald-light);
+}
+
+.commit-list-accordion {
+  margin-top: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.commit-history-item {
+  font-size: 0.7rem;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1.3;
+}
+
+.commit-hash-badge {
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: var(--emerald-light);
+  flex-shrink: 0;
+}
+
+.commit-history-msg {
+  color: var(--text-muted);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
