@@ -1,5 +1,35 @@
 [
   {
+    "id": "sms_1790937680512",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY KILL SWITCH] Tous les serveurs ont été arrêtés avec succès (2 services). Machine au repos.",
+    "trigger": "kill_switch",
+    "timestamp": "2026-10-02T10:41:20.512Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790937679634",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T10:41:19.634Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790937679372",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "Test sécurité @AUD : Session chiffrée validée.",
+    "trigger": "smartphone_manual",
+    "timestamp": "2026-10-02T10:41:19.372Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
     "id": "sms_1790935810577",
     "to": "+33778246567",
     "displayPhone": "07 78 24 65 67",

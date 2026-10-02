@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initKeypad();
   initAudioVoices();
   updateAudioToggleUI();
+  updateBioEnrolledUI();
 
   // Initialisation du mode nuit OLED
   const isOled = localStorage.getItem('agy_oled_mode') === 'true';
@@ -164,13 +165,63 @@ async function submitPin() {
   }
 }
 
+// Utilitaires de conversion W3C WebAuthn pour smartphones
+function base64ToUint8Array(base64String) {
+  if (!base64String) return new Uint8Array(0);
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+function arrayBufferToBase64Url(buffer) {
+  if (!buffer) return '';
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 /**
- * Déverrouillage biométrique FaceID / TouchID / Empreinte (WebAuthn & Passkeys)
+ * Mise à jour visuelle du statut biométrique
  */
-async function unlockWithBiometrics() {
+function updateBioEnrolledUI(enrolled = false) {
+  const badge = document.getElementById('bio-enrolled-badge');
+  const btnLabel = document.getElementById('bio-btn-label');
+  const isEnrolled = enrolled || !!localStorage.getItem('agy_bio_credential_id');
+  if (badge) {
+    badge.textContent = isEnrolled ? 'Enregistrée ✅' : 'À configurer';
+    badge.className = 'badge ' + (isEnrolled ? 'badge-emerald' : 'badge-amber');
+  }
+  if (btnLabel) {
+    btnLabel.textContent = isEnrolled ? 'Déverrouiller par Empreinte' : 'Activer l’Empreinte Digitale';
+  }
+}
+
+/**
+ * Enregistrement de l'empreinte biométrique FaceID / TouchID pour Seb
+ */
+async function registerBiometrics() {
   triggerHaptic();
-  const errEl = document.getElementById('lock-error-msg');
-  if (errEl) errEl.textContent = 'Authentification biométrique en cours...';
+  showToast("Initialisation du capteur biométrique...", "📱");
+
+  const isHttps = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (!isHttps || !window.isSecureContext) {
+    const remoteLink = document.getElementById('remote-url-link')?.href || 'https://determine-midlands-satisfaction-theories.trycloudflare.com';
+    alert(`⚠️ L'empreinte digitale est bloquée par votre smartphone sur HTTP non sécurisé.\n\n👉 Ouvrez le hub via l'adresse sécurisée HTTPS Cloudflare :\n${remoteLink}`);
+    return;
+  }
+
+  if (!window.PublicKeyCredential) {
+    showToast("Votre navigateur ne supporte pas l'empreinte WebAuthn.", "❌");
+    return;
+  }
 
   try {
     const challengeRes = await fetch('/api/auth/biometric/challenge', {
@@ -180,50 +231,214 @@ async function unlockWithBiometrics() {
     const challengeData = await challengeRes.json();
     const challenge = challengeData.challenge;
 
-    let credentialId = localStorage.getItem('agy_bio_credential_id') || 'seb_faceid_master_key';
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: base64ToUint8Array(challenge),
+        rp: {
+          name: 'Mobil Antigravity',
+          id: window.location.hostname
+        },
+        user: {
+          id: new TextEncoder().encode('seb-master-0778246567'),
+          name: 'seb@antigravity',
+          displayName: 'Sébastien (07 78 24 65 67)'
+        },
+        pubKeyCredParams: [
+          { alg: -7, type: 'public-key' },
+          { alg: -257, type: 'public-key' }
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',
+          userVerification: 'required',
+          residentKey: 'preferred'
+        },
+        timeout: 60000
+      }
+    });
 
-    // Vérifier si WebAuthn natif est supporté par le matériel et contexte sécurisé
-    if (window.PublicKeyCredential && window.isSecureContext) {
+    if (credential) {
+      const rawCredentialId = credential.id || arrayBufferToBase64Url(credential.rawId);
+      
+      await fetch('/api/auth/biometric/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'AntigravityMobilePilot'
+        },
+        body: JSON.stringify({
+          credentialId: rawCredentialId,
+          clientName: 'Smartphone Seb'
+        })
+      });
+
+      localStorage.setItem('agy_bio_credential_id', rawCredentialId);
+      showToast("Empreinte biométrique enregistrée avec succès !", "🎉");
+      speakVoiceResponse("Votre empreinte digitale a été enregistrée avec succès.");
+      updateBioEnrolledUI(true);
+    }
+  } catch (err) {
+    console.warn('[WebAuthn Register] Erreur:', err);
+    if (err.name === 'NotAllowedError') {
+      showToast("Scan d'empreinte annulé.", "⚠️");
+    } else {
+      showToast(`Erreur capteur: ${err.message || err.name}`, "❌");
+    }
+  }
+}
+
+/**
+ * Déverrouillage biométrique FaceID / TouchID / Empreinte (WebAuthn & Passkeys)
+ */
+async function unlockWithBiometrics() {
+  triggerHaptic();
+  const errEl = document.getElementById('lock-error-msg');
+  const warningEl = document.getElementById('bio-http-warning');
+  const httpsLink = document.getElementById('bio-https-link');
+  if (errEl) errEl.textContent = 'Préparation du capteur d’empreinte...';
+  if (warningEl) warningEl.style.display = 'none';
+
+  // 1. Détection du contexte HTTP non sécurisé
+  const isHttps = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (!isHttps || !window.isSecureContext) {
+    if (errEl) errEl.textContent = "Capteur bloqué : connexion HTTPS requise.";
+    if (warningEl) {
+      warningEl.style.display = 'block';
+      fetch('/api/status').then(r => r.json()).then(d => {
+        if (d.remoteUrl && httpsLink) {
+          httpsLink.href = d.remoteUrl;
+          httpsLink.textContent = d.remoteUrl + ' ↗';
+        }
+      }).catch(() => {});
+    }
+    showToast("L'empreinte requiert HTTPS. Tapez votre code PIN 6567.", "⚠️");
+    return;
+  }
+
+  // 2. Détection du support matériel WebAuthn
+  if (!window.PublicKeyCredential) {
+    if (errEl) errEl.textContent = "WebAuthn non supporté. Tapez votre code PIN 6567.";
+    showToast("Capteur biométrique non supporté par ce navigateur.", "❌");
+    return;
+  }
+
+  try {
+    const challengeRes = await fetch('/api/auth/biometric/challenge', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'AntigravityMobilePilot' }
+    });
+    const challengeData = await challengeRes.json();
+    const challenge = challengeData.challenge;
+
+    const savedId = localStorage.getItem('agy_bio_credential_id');
+    let credential = null;
+
+    // A. Si une clé est enregistrée -> navigator.credentials.get
+    if (savedId) {
+      if (errEl) errEl.textContent = 'Posez votre doigt sur le capteur...';
       try {
-        const credential = await navigator.credentials.get({
+        credential = await navigator.credentials.get({
           publicKey: {
-            challenge: Uint8Array.from(atob(challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
-            timeout: 60000,
-            userVerification: 'preferred'
+            challenge: base64ToUint8Array(challenge),
+            allowCredentials: [{
+              id: base64ToUint8Array(savedId),
+              type: 'public-key',
+              transports: ['internal']
+            }],
+            userVerification: 'required',
+            timeout: 60000
           }
         });
-        if (credential) {
-          credentialId = credential.id;
-        }
-      } catch (webauthnErr) {
-        console.warn('[WebAuthn] Repli sécurisé token:', webauthnErr.message);
+      } catch (getErr) {
+        console.warn('[WebAuthn Get] Échec assertion, tentative de création:', getErr);
+        credential = null;
       }
     }
 
-    // Vérification de l'assertion biométrique par le serveur
-    const verifyRes = await fetch('/api/auth/biometric/verify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'AntigravityMobilePilot'
-      },
-      body: JSON.stringify({ credentialId, challenge })
-    });
-
-    const verifyData = await verifyRes.json();
-    if (verifyData.success && verifyData.token) {
-      authToken = verifyData.token;
-      localStorage.setItem('agy_token', authToken);
-      localStorage.setItem('agy_bio_credential_id', credentialId);
-      hideLockScreen();
-      showToast('Déverrouillage FaceID / Empreinte réussi !', '🔓');
-      onAuthenticated();
-    } else {
-      if (errEl) errEl.textContent = verifyData.error || 'Échec d’identification biométrique.';
-      triggerHaptic();
+    // B. Si aucune clé n'est encore enregistrée (ou si get a échoué) -> navigator.credentials.create
+    // Cela affiche la boîte de dialogue native du téléphone pour enregistrer son empreinte !
+    if (!credential) {
+      if (errEl) errEl.textContent = 'Posez votre doigt sur le capteur pour enregistrer l’empreinte...';
+      credential = await navigator.credentials.create({
+        publicKey: {
+          challenge: base64ToUint8Array(challenge),
+          rp: {
+            name: 'Mobil Antigravity',
+            id: window.location.hostname
+          },
+          user: {
+            id: new TextEncoder().encode('seb-master-0778246567'),
+            name: 'seb@antigravity',
+            displayName: 'Sébastien (07 78 24 65 67)'
+          },
+          pubKeyCredParams: [
+            { alg: -7, type: 'public-key' },
+            { alg: -257, type: 'public-key' }
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: 'platform',
+            userVerification: 'required',
+            residentKey: 'preferred'
+          },
+          timeout: 60000
+        }
+      });
     }
+
+    // C. Si l'empreinte a été validée par le capteur matériel
+    if (credential) {
+      const rawCredentialId = credential.id || arrayBufferToBase64Url(credential.rawId);
+
+      // Enregistrement auprès du serveur
+      await fetch('/api/auth/biometric/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'AntigravityMobilePilot'
+        },
+        body: JSON.stringify({
+          credentialId: rawCredentialId,
+          clientName: 'Smartphone Seb'
+        })
+      });
+
+      // Vérification et émission du token de session
+      const verifyRes = await fetch('/api/auth/biometric/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'AntigravityMobilePilot'
+        },
+        body: JSON.stringify({
+          credentialId: rawCredentialId,
+          challenge
+        })
+      });
+
+      const verifyData = await verifyRes.json();
+      if (verifyData.success && verifyData.token) {
+        authToken = verifyData.token;
+        localStorage.setItem('agy_token', authToken);
+        localStorage.setItem('agy_bio_credential_id', rawCredentialId);
+        hideLockScreen();
+        showToast('Déverrouillage par empreinte réussi ! 🔓', '🎉');
+        speakVoiceResponse('Authentification biométrique certifiée. Bienvenue Seb.');
+        onAuthenticated();
+        return;
+      }
+    }
+
+    if (errEl) errEl.textContent = 'Échec de validation de l’empreinte.';
   } catch (err) {
-    if (errEl) errEl.textContent = 'Erreur lors du scan biométrique.';
+    console.error('[Biometrics] Erreur:', err);
+    if (err.name === 'NotAllowedError') {
+      if (errEl) errEl.textContent = 'Scan d’empreinte annulé. Utilisez votre code PIN 6567.';
+    } else if (err.name === 'SecurityError') {
+      if (errEl) errEl.textContent = 'Connexion HTTPS requise pour le capteur biométrique.';
+      if (warningEl) warningEl.style.display = 'block';
+    } else {
+      if (errEl) errEl.textContent = `Erreur capteur: ${err.message || err.name}. Tapez le PIN 6567.`;
+    }
+    triggerHaptic();
   }
 }
 
@@ -298,6 +513,7 @@ function onAuthenticated() {
   initLogStream();
   loadSmsHistory();
   loadSecurityEvents();
+  updateBioEnrolledUI();
 }
 
 /**
@@ -1573,6 +1789,8 @@ window.sendSmsManual = sendSmsManual;
 window.installPwa = installPwa;
 window.logout = logout;
 window.unlockWithBiometrics = unlockWithBiometrics;
+window.registerBiometrics = registerBiometrics;
+window.updateBioEnrolledUI = updateBioEnrolledUI;
 window.toggleRemoteTunnel = toggleRemoteTunnel;
 window.toggleVoiceAssistant = toggleVoiceAssistant;
 window.closeVoiceAssistant = closeVoiceAssistant;

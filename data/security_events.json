@@ -1,5 +1,200 @@
 [
   {
+    "id": "sec_1790937680483_iog0",
+    "timestamp": "2026-10-02T10:41:20.483Z",
+    "eventType": "ACTION_EXECUTED",
+    "ip": "127.0.0.1",
+    "status": "SUCCESS",
+    "details": {
+      "action": "kill_switch"
+    }
+  },
+  {
+    "id": "sec_1790937680410_aarr",
+    "timestamp": "2026-10-02T10:41:20.410Z",
+    "eventType": "VOICE_COMMAND_RECEIVED",
+    "ip": "127.0.0.1",
+    "status": "INFO",
+    "details": {
+      "transcript": "Fais un audit de sécurité pour SmartTrip s’il te plaît",
+      "intent": "RUN_AUDIT"
+    }
+  },
+  {
+    "id": "sec_1790937680391_yiv0",
+    "timestamp": "2026-10-02T10:41:20.391Z",
+    "eventType": "ACTION_EXECUTED",
+    "ip": "127.0.0.1",
+    "status": "SUCCESS",
+    "details": {
+      "action": "run_audit",
+      "target": "$HOMEagy2-projectsmy-first-project"
+    }
+  },
+  {
+    "id": "sec_1790937680341_6yzw",
+    "timestamp": "2026-10-02T10:41:20.341Z",
+    "eventType": "ACTION_EXECUTED",
+    "ip": "127.0.0.1",
+    "status": "SUCCESS",
+    "details": {
+      "action": "stop_project",
+      "target": "$HOMEagy2-projectsmy-first-project"
+    }
+  },
+  {
+    "id": "sec_1790937680327_txml",
+    "timestamp": "2026-10-02T10:41:20.327Z",
+    "eventType": "ACTION_EXECUTED",
+    "ip": "127.0.0.1",
+    "status": "SUCCESS",
+    "details": {
+      "action": "launch_project",
+      "target": "$HOMEagy2-projectsmy-first-project"
+    }
+  },
+  {
+    "id": "sec_1790937679653_y1kh",
+    "timestamp": "2026-10-02T10:41:19.653Z",
+    "eventType": "AUTH_BIOMETRIC_SUCCESS",
+    "ip": "127.0.0.1",
+    "status": "SUCCESS",
+    "details": {
+      "credentialId": "seb_faceid_master_key"
+    }
+  },
+  {
+    "id": "sec_1790937679461_lkab",
+    "timestamp": "2026-10-02T10:41:19.461Z",
+    "eventType": "VOICE_COMMAND_RECEIVED",
+    "ip": "127.0.0.1",
+    "status": "INFO",
+    "details": {
+      "transcript": "Lance le serveur SaaS RDV-Hub s’il te plaît",
+      "intent": "START_SAAS"
+    }
+  },
+  {
+    "id": "sec_1790937679447_9rq8",
+    "timestamp": "2026-10-02T10:41:19.447Z",
+    "eventType": "AUTH_RATE_LIMITED",
+    "ip": "198.51.100.99",
+    "status": "BLOCKED",
+    "details": {
+      "retryAfter": 300
+    }
+  },
+  {
+    "id": "sec_1790937679436_jm1v",
+    "timestamp": "2026-10-02T10:41:19.436Z",
+    "eventType": "AUTH_LOGIN_FAIL",
+    "ip": "198.51.100.99",
+    "status": "WARN",
+    "details": {
+      "attemptsRemaining": 0
+    }
+  },
+  {
+    "id": "sec_1790937679423_ewum",
+    "timestamp": "2026-10-02T10:41:19.423Z",
+    "eventType": "AUTH_LOGIN_FAIL",
+    "ip": "198.51.100.99",
+    "status": "WARN",
+    "details": {
+      "attemptsRemaining": 1
+    }
+  },
+  {
+    "id": "sec_1790937679410_ckxr",
+    "timestamp": "2026-10-02T10:41:19.410Z",
+    "eventType": "AUTH_LOGIN_FAIL",
+    "ip": "198.51.100.99",
+    "status": "WARN",
+    "details": {
+      "attemptsRemaining": 2
+    }
+  },
+  {
+    "id": "sec_1790937679398_uk8m",
+    "timestamp": "2026-10-02T10:41:19.398Z",
+    "eventType": "AUTH_LOGIN_FAIL",
+    "ip": "198.51.100.99",
+    "status": "WARN",
+    "details": {
+      "attemptsRemaining": 3
+    }
+  },
+  {
+    "id": "sec_1790937679390_7y5c",
+    "timestamp": "2026-10-02T10:41:19.390Z",
+    "eventType": "AUTH_LOGIN_FAIL",
+    "ip": "198.51.100.99",
+    "status": "WARN",
+    "details": {
+      "attemptsRemaining": 4
+    }
+  },
+  {
+    "id": "sec_1790937679360_v49j",
+    "timestamp": "2026-10-02T10:41:19.360Z",
+    "eventType": "PATH_TRAVERSAL_BLOCKED",
+    "ip": "127.0.0.1",
+    "status": "BLOCKED",
+    "details": {
+      "url": "/../../Windows/win.ini"
+    }
+  },
+  {
+    "id": "sec_1790937679348_amv3",
+    "timestamp": "2026-10-02T10:41:19.348Z",
+    "eventType": "COMMAND_INJECTION_BLOCKED",
+    "ip": "127.0.0.1",
+    "status": "BLOCKED",
+    "details": {
+      "action": "cmd; calc.exe"
+    }
+  },
+  {
+    "id": "sec_1790937679333_7hbh",
+    "timestamp": "2026-10-02T10:41:19.333Z",
+    "eventType": "PAYLOAD_TOO_LARGE",
+    "ip": "127.0.0.1",
+    "status": "BLOCKED",
+    "details": {
+      "receivedBytes": 12299
+    }
+  },
+  {
+    "id": "sec_1790937679320_l4d4",
+    "timestamp": "2026-10-02T10:41:19.320Z",
+    "eventType": "CSRF_ORIGIN_BLOCKED",
+    "ip": "127.0.0.1",
+    "status": "BLOCKED",
+    "details": {
+      "origin": "http://evil-attacker-site.com"
+    }
+  },
+  {
+    "id": "sec_1790937678117_u7sa",
+    "timestamp": "2026-10-02T10:41:18.117Z",
+    "eventType": "AUTH_LOGIN_SUCCESS",
+    "ip": "127.0.0.1",
+    "status": "SUCCESS",
+    "details": {
+      "method": "PIN"
+    }
+  },
+  {
+    "id": "sec_1790937678100_34qr",
+    "timestamp": "2026-10-02T10:41:18.100Z",
+    "eventType": "AUTH_UNAUTHORIZED_ACCESS",
+    "ip": "127.0.0.1",
+    "status": "BLOCKED",
+    "details": {
+      "path": "/api/projects"
+    }
+  },
+  {
     "id": "sec_1790935810545_mi44",
     "timestamp": "2026-10-02T10:10:10.545Z",
     "eventType": "ACTION_EXECUTED",
@@ -825,199 +1020,6 @@
     "timestamp": "2026-09-29T19:40:52.968Z",
     "eventType": "AUTH_LOGIN_SUCCESS",
     "ip": "192.168.1.46",
-    "status": "SUCCESS",
-    "details": {
-      "method": "PIN"
-    }
-  },
-  {
-    "id": "sec_1790710852745_vj0a",
-    "timestamp": "2026-09-29T19:40:52.745Z",
-    "eventType": "AUTH_UNAUTHORIZED_ACCESS",
-    "ip": "192.168.1.46",
-    "status": "BLOCKED",
-    "details": {
-      "path": "/api/logs/stream"
-    }
-  },
-  {
-    "id": "sec_1790710849155_n0vn",
-    "timestamp": "2026-09-29T19:40:49.155Z",
-    "eventType": "AUTH_UNAUTHORIZED_ACCESS",
-    "ip": "192.168.1.46",
-    "status": "BLOCKED",
-    "details": {
-      "path": "/api/projects"
-    }
-  },
-  {
-    "id": "sec_1790710813704_jt23",
-    "timestamp": "2026-09-29T19:40:13.704Z",
-    "eventType": "AUTH_LOGIN_SUCCESS",
-    "ip": "127.0.0.1",
-    "status": "SUCCESS",
-    "details": {
-      "method": "PIN"
-    }
-  },
-  {
-    "id": "sec_1790710777468_9f9d",
-    "timestamp": "2026-09-29T19:39:37.468Z",
-    "eventType": "AUTH_LOGIN_SUCCESS",
-    "ip": "192.168.1.76",
-    "status": "SUCCESS",
-    "details": {
-      "method": "PAIRING_TOKEN"
-    }
-  },
-  {
-    "id": "sec_1790710770289_6ofi",
-    "timestamp": "2026-09-29T19:39:30.289Z",
-    "eventType": "ACTION_EXECUTED",
-    "ip": "127.0.0.1",
-    "status": "SUCCESS",
-    "details": {
-      "action": "stop_project",
-      "target": "$HOMEagy2-projectsmy-first-project"
-    }
-  },
-  {
-    "id": "sec_1790710770125_vgc1",
-    "timestamp": "2026-09-29T19:39:30.125Z",
-    "eventType": "ACTION_EXECUTED",
-    "ip": "127.0.0.1",
-    "status": "SUCCESS",
-    "details": {
-      "action": "launch_project",
-      "target": "$HOMEagy2-projectsmy-first-project"
-    }
-  },
-  {
-    "id": "sec_1790710770099_7lry",
-    "timestamp": "2026-09-29T19:39:30.099Z",
-    "eventType": "AUTH_BIOMETRIC_SUCCESS",
-    "ip": "127.0.0.1",
-    "status": "SUCCESS",
-    "details": {
-      "credentialId": "seb_faceid_master_key"
-    }
-  },
-  {
-    "id": "sec_1790710770080_hmxu",
-    "timestamp": "2026-09-29T19:39:30.080Z",
-    "eventType": "VOICE_COMMAND_RECEIVED",
-    "ip": "127.0.0.1",
-    "status": "INFO",
-    "details": {
-      "transcript": "Lance le serveur SaaS RDV-Hub s’il te plaît",
-      "intent": "START_SAAS"
-    }
-  },
-  {
-    "id": "sec_1790710770066_kaue",
-    "timestamp": "2026-09-29T19:39:30.066Z",
-    "eventType": "AUTH_RATE_LIMITED",
-    "ip": "198.51.100.99",
-    "status": "BLOCKED",
-    "details": {
-      "retryAfter": 300
-    }
-  },
-  {
-    "id": "sec_1790710770054_uvji",
-    "timestamp": "2026-09-29T19:39:30.054Z",
-    "eventType": "AUTH_LOGIN_FAIL",
-    "ip": "198.51.100.99",
-    "status": "WARN",
-    "details": {
-      "attemptsRemaining": 0
-    }
-  },
-  {
-    "id": "sec_1790710770041_vsoc",
-    "timestamp": "2026-09-29T19:39:30.041Z",
-    "eventType": "AUTH_LOGIN_FAIL",
-    "ip": "198.51.100.99",
-    "status": "WARN",
-    "details": {
-      "attemptsRemaining": 1
-    }
-  },
-  {
-    "id": "sec_1790710770030_kd33",
-    "timestamp": "2026-09-29T19:39:30.030Z",
-    "eventType": "AUTH_LOGIN_FAIL",
-    "ip": "198.51.100.99",
-    "status": "WARN",
-    "details": {
-      "attemptsRemaining": 2
-    }
-  },
-  {
-    "id": "sec_1790710770018_wft9",
-    "timestamp": "2026-09-29T19:39:30.018Z",
-    "eventType": "AUTH_LOGIN_FAIL",
-    "ip": "198.51.100.99",
-    "status": "WARN",
-    "details": {
-      "attemptsRemaining": 3
-    }
-  },
-  {
-    "id": "sec_1790710770010_uerb",
-    "timestamp": "2026-09-29T19:39:30.010Z",
-    "eventType": "AUTH_LOGIN_FAIL",
-    "ip": "198.51.100.99",
-    "status": "WARN",
-    "details": {
-      "attemptsRemaining": 4
-    }
-  },
-  {
-    "id": "sec_1790710769980_0qx7",
-    "timestamp": "2026-09-29T19:39:29.980Z",
-    "eventType": "PATH_TRAVERSAL_BLOCKED",
-    "ip": "127.0.0.1",
-    "status": "BLOCKED",
-    "details": {
-      "url": "/../../Windows/win.ini"
-    }
-  },
-  {
-    "id": "sec_1790710769968_vc2o",
-    "timestamp": "2026-09-29T19:39:29.968Z",
-    "eventType": "COMMAND_INJECTION_BLOCKED",
-    "ip": "127.0.0.1",
-    "status": "BLOCKED",
-    "details": {
-      "action": "cmd; calc.exe"
-    }
-  },
-  {
-    "id": "sec_1790710769955_e7gi",
-    "timestamp": "2026-09-29T19:39:29.955Z",
-    "eventType": "PAYLOAD_TOO_LARGE",
-    "ip": "127.0.0.1",
-    "status": "BLOCKED",
-    "details": {
-      "receivedBytes": 12299
-    }
-  },
-  {
-    "id": "sec_1790710769942_9spy",
-    "timestamp": "2026-09-29T19:39:29.942Z",
-    "eventType": "CSRF_ORIGIN_BLOCKED",
-    "ip": "127.0.0.1",
-    "status": "BLOCKED",
-    "details": {
-      "origin": "http://evil-attacker-site.com"
-    }
-  },
-  {
-    "id": "sec_1790710769373_t31v",
-    "timestamp": "2026-09-29T19:39:29.373Z",
-    "eventType": "AUTH_LOGIN_SUCCESS",
-    "ip": "127.0.0.1",
     "status": "SUCCESS",
     "details": {
       "method": "PIN"

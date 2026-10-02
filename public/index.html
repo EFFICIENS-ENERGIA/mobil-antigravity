@@ -52,10 +52,19 @@
 
     <button class="bio-unlock-btn" id="bio-unlock-btn" onclick="unlockWithBiometrics()">
       <span>🔓</span>
-      <span>Déverrouiller FaceID / Empreinte</span>
+      <span id="bio-btn-label">Déverrouiller FaceID / Empreinte</span>
     </button>
 
     <div class="lock-error" id="lock-error-msg"></div>
+
+    <div id="bio-http-warning" style="display: none; margin-top: 10px; padding: 10px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; font-size: 0.75rem; color: #fbbf24; text-align: left;">
+      <div>⚠️ <strong>Capteur biométrique bloqué par le navigateur :</strong></div>
+      <div style="color: #cbd5e1; margin-top: 4px;">
+        Votre smartphone bloque l'accès physique à l'empreinte sur les adresses <code>http://</code> non chiffrées.<br>
+        👉 <strong>Solution :</strong> Ouvrez votre lien sécurisé <strong>HTTPS</strong> :<br>
+        <a href="#" id="bio-https-link" style="color: var(--emerald-light); font-weight: 700; text-decoration: underline; word-break: break-all;">Ouvrir en HTTPS ↗</a>
+      </div>
+    </div>
 
     <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 15px;">
       Code par défaut : 6567 (ou flashez le QR Code de votre PC)
@@ -402,6 +411,20 @@
             🔒 Verrouiller la Session
           </button>
         </div>
+      </div>
+
+      <!-- Configuration Empreinte Digitale / FaceID -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">🔐 Empreinte Digitale & FaceID</div>
+          <span class="badge badge-emerald" id="bio-enrolled-badge">Prêt</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+          Associez le capteur biométrique de votre smartphone pour déverrouiller Mobil Antigravity en 1-Touch sans ressaisir votre code PIN.
+        </p>
+        <button class="btn btn-outline-emerald" onclick="registerBiometrics()" id="btn-register-bio">
+          📱 Configurer / Enregistrer mon Empreinte
+        </button>
       </div>
 
       <!-- Envoi SMS d'Alerte -->
