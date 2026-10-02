@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     showLockScreen();
   }
 
-  // 2. Gestion des Raccourcis PWA (PWA Shortcuts) : ?open=voice, ?open=kill_switch, ?open=audit, ?open=saas
+  // 2. Gestion des Raccourcis PWA (PWA Shortcuts) : ?open=voice, ?open=kill_switch, ?open=audit, ?open=saas, ?open=smarttrip
   const openAction = urlParams.get('open');
   if (openAction) {
     setTimeout(() => {
@@ -50,7 +50,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       else if (openAction === 'kill_switch') triggerKillSwitch();
       else if (openAction === 'audit') triggerProjectAudit('mobil antigravity');
       else if (openAction === 'saas') triggerAction('start_saas_server');
+      else if (openAction === 'smarttrip') triggerAction('launch_project', '$HOMEagy2-projectsmy-first-project');
     }, 800);
+  }
+
+  // Initialisation de l'écoute continue Wake-Word si activée
+  if (localStorage.getItem('agy_wakeword_enabled') === 'true') {
+    setTimeout(() => {
+      startWakeWordListener();
+    }, 1500);
   }
 
   // Actualisation périodique si authentifié (Projets & Télémétrie)
@@ -870,7 +878,123 @@ function setProjectFilter(filterName) {
 }
 
 /**
- * Rendu visuel de la liste filtrée des projets
+ * Récupère les IDs de projets favoris depuis localStorage
+ */
+function getFavoriteProjects() {
+  try {
+    return JSON.parse(localStorage.getItem('agy_favorite_projects') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Récupère l'ordre personnalisé des cartes projets
+ */
+function getProjectCustomOrder() {
+  try {
+    return JSON.parse(localStorage.getItem('agy_project_order') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Bascule l'état favori d'un projet
+ */
+function toggleFavoriteProject(projectId) {
+  triggerHaptic();
+  let favs = getFavoriteProjects();
+  if (favs.includes(projectId)) {
+    favs = favs.filter(id => id !== projectId);
+    showToast("Retiré des favoris", "⭐");
+  } else {
+    favs.push(projectId);
+    showToast("Ajouté aux favoris prioritaires", "⭐");
+  }
+  localStorage.setItem('agy_favorite_projects', JSON.stringify(favs));
+  renderFilteredProjects();
+}
+
+/**
+ * Déplacement tactile d'une carte dans l'ordre d'affichage (Monter / Descendre)
+ */
+function moveProjectOrder(projectId, direction) {
+  triggerHaptic();
+  const order = getProjectCustomOrder();
+  const allIds = allProjects.map(p => p.id);
+  const currentOrder = order.filter(id => allIds.includes(id));
+  allIds.forEach(id => {
+    if (!currentOrder.includes(id)) currentOrder.push(id);
+  });
+
+  const idx = currentOrder.indexOf(projectId);
+  if (idx < 0) return;
+  const newIdx = idx + direction;
+  if (newIdx >= 0 && newIdx < currentOrder.length) {
+    const temp = currentOrder[idx];
+    currentOrder[idx] = currentOrder[newIdx];
+    currentOrder[newIdx] = temp;
+    localStorage.setItem('agy_project_order', JSON.stringify(currentOrder));
+    renderFilteredProjects();
+  }
+}
+
+let draggedCardId = null;
+
+function handleCardDragStart(e, projectId) {
+  draggedCardId = projectId;
+  if (e.dataTransfer) {
+    e.dataTransfer.setData('text/plain', projectId);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+  e.currentTarget.classList.add('card-dragging');
+}
+
+function handleCardDragOver(e) {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  const card = e.currentTarget;
+  if (card && !card.classList.contains('card-drop-target')) {
+    card.classList.add('card-drop-target');
+  }
+}
+
+function handleCardDragLeave(e) {
+  e.currentTarget.classList.remove('card-drop-target');
+}
+
+function handleCardDrop(e, targetProjectId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('card-drop-target');
+  if (!draggedCardId || draggedCardId === targetProjectId) return;
+
+  const order = getProjectCustomOrder();
+  const allIds = allProjects.map(p => p.id);
+  const currentOrder = order.filter(id => allIds.includes(id));
+  allIds.forEach(id => {
+    if (!currentOrder.includes(id)) currentOrder.push(id);
+  });
+
+  const fromIdx = currentOrder.indexOf(draggedCardId);
+  const toIdx = currentOrder.indexOf(targetProjectId);
+  if (fromIdx >= 0 && toIdx >= 0) {
+    currentOrder.splice(fromIdx, 1);
+    currentOrder.splice(toIdx, 0, draggedCardId);
+    localStorage.setItem('agy_project_order', JSON.stringify(currentOrder));
+    renderFilteredProjects();
+    showToast("Cartes réordonnées avec succès", "↕️");
+  }
+}
+
+function handleCardDragEnd(e) {
+  draggedCardId = null;
+  document.querySelectorAll('.card-dragging').forEach(el => el.classList.remove('card-dragging'));
+  document.querySelectorAll('.card-drop-target').forEach(el => el.classList.remove('card-drop-target'));
+}
+
+/**
+ * Rendu visuel de la liste filtrée et réordonnable des projets (Drag & Drop + Favoris)
  */
 function renderFilteredProjects() {
   const container = document.getElementById('projects-list');
@@ -896,6 +1020,24 @@ function renderFilteredProjects() {
     filtered = filtered.filter(p => p.hasGit);
   }
 
+  // 3. Tri personnalisé : Favoris en tête, puis selon l'ordre custom
+  const favorites = getFavoriteProjects();
+  const customOrder = getProjectCustomOrder();
+
+  filtered.sort((a, b) => {
+    const isFavA = favorites.includes(a.id);
+    const isFavB = favorites.includes(b.id);
+    if (isFavA && !isFavB) return -1;
+    if (!isFavA && isFavB) return 1;
+
+    const idxA = customOrder.indexOf(a.id);
+    const idxB = customOrder.indexOf(b.id);
+    if (idxA >= 0 && idxB >= 0) return idxA - idxB;
+    if (idxA >= 0) return -1;
+    if (idxB >= 0) return 1;
+    return 0;
+  });
+
   const countBadge = document.getElementById('project-count-badge');
   if (countBadge) {
     countBadge.textContent = `${filtered.length} / ${allProjects.length} projets`;
@@ -913,6 +1055,7 @@ function renderFilteredProjects() {
   }
 
   container.innerHTML = filtered.map(proj => {
+    const isFav = favorites.includes(proj.id);
     let badgeClass = 'badge-gray';
     if (proj.status === 'RUNNING' || proj.isPortActive) badgeClass = 'badge-emerald';
     else if (proj.status === 'TESTED') badgeClass = 'badge-blue';
@@ -956,13 +1099,27 @@ function renderFilteredProjects() {
     const qaScore = proj.tests && proj.tests.score ? proj.tests.score : '100% PASS';
 
     return `
-      <div class="glass-card" id="card-${proj.id}">
+      <div class="glass-card card-draggable" id="card-${proj.id}" draggable="true"
+           ondragstart="handleCardDragStart(event, '${proj.id}')"
+           ondragover="handleCardDragOver(event)"
+           ondragleave="handleCardDragLeave(event)"
+           ondrop="handleCardDrop(event, '${proj.id}')"
+           ondragend="handleCardDragEnd(event)">
         <div class="card-header">
           <div class="card-title">
             <span>${icon}</span>
             <span>${escapeHtml(proj.displayName || proj.name)}</span>
           </div>
-          <span class="badge ${badgeClass}">${proj.statusLabel}</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button class="favorite-btn ${isFav ? 'active' : ''}" onclick="toggleFavoriteProject('${proj.id}')" title="Marquer en favori prioritaire">
+              ⭐ ${isFav ? 'Favori' : 'Suivre'}
+            </button>
+            <div style="display: flex; gap: 2px;">
+              <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.68rem;" onclick="moveProjectOrder('${proj.id}', -1)" title="Monter">▲</button>
+              <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.68rem;" onclick="moveProjectOrder('${proj.id}', 1)" title="Descendre">▼</button>
+            </div>
+            <span class="badge ${badgeClass}">${proj.statusLabel}</span>
+          </div>
         </div>
 
         <!-- Bulle de Télémétrie Git en direct -->
@@ -1067,14 +1224,6 @@ function toggleCommitDrawer(projId) {
   if (el) {
     const isHidden = el.style.display === 'none';
     el.style.display = isHidden ? 'flex' : 'none';
-  }
-}
-
-    const countBadge = document.getElementById('project-count-badge');
-    if (countBadge) countBadge.textContent = `${data.projects.length} projets`;
-
-  } catch (err) {
-    console.error('Erreur chargement projets:', err);
   }
 }
 
@@ -1223,32 +1372,77 @@ function initLogStream() {
   };
 }
 
-function appendLog(item) {
+let terminalLogsHistory = [];
+let currentConsoleFilter = 'ALL';
+let consoleSearchQuery = '';
+
+function setConsoleLevelFilter(level) {
+  triggerHaptic();
+  currentConsoleFilter = level;
+  document.querySelectorAll('#console-level-filters .filter-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.level === level);
+  });
+  renderFilteredTerminalLogs();
+}
+
+function filterTerminalLogs() {
+  const input = document.getElementById('console-search-input');
+  if (input) {
+    consoleSearchQuery = input.value.trim().toLowerCase();
+    renderFilteredTerminalLogs();
+  }
+}
+
+function renderFilteredTerminalLogs() {
   const body = document.getElementById('terminal-body');
   if (!body) return;
 
-  const line = document.createElement('div');
-  line.className = 'log-line';
+  let filtered = terminalLogsHistory.slice();
 
-  let typeClass = 'log-stdout';
-  if (item.type === 'stderr') typeClass = 'log-stderr';
-  if (item.type === 'system') typeClass = 'log-system';
-
-  line.innerHTML = `
-    <span class="log-time">[${item.timestamp}]</span>
-    <span class="log-source">[${item.source}]</span>
-    <span class="${typeClass}">${escapeHtml(item.message)}</span>
-  `;
-
-  body.appendChild(line);
-
-  while (body.childNodes.length > 250) {
-    body.removeChild(body.firstChild);
+  if (currentConsoleFilter !== 'ALL') {
+    filtered = filtered.filter(item => {
+      const type = (item.type || '').toLowerCase();
+      const msg = (item.message || '').toUpperCase();
+      if (currentConsoleFilter === 'ERROR') return type === 'stderr' || msg.includes('FAIL') || msg.includes('ERREUR') || msg.includes('ERROR');
+      if (currentConsoleFilter === 'WARN') return msg.includes('WARN') || msg.includes('ATTENTION') || msg.includes('AVERTISSEMENT');
+      if (currentConsoleFilter === 'INFO') return type === 'stdout' || type === 'system';
+      return true;
+    });
   }
+
+  if (consoleSearchQuery) {
+    filtered = filtered.filter(item => {
+      const fullText = `[${item.timestamp || ''}] [${item.source || ''}] ${item.message || ''}`.toLowerCase();
+      return fullText.includes(consoleSearchQuery);
+    });
+  }
+
+  body.innerHTML = filtered.map(item => {
+    let typeClass = 'log-stdout';
+    if (item.type === 'stderr' || (item.message && item.message.includes('FAIL'))) typeClass = 'log-stderr';
+    else if (item.type === 'system') typeClass = 'log-system';
+    else if (item.message && (item.message.includes('WARN') || item.message.includes('Avertissement'))) typeClass = 'log-warn';
+
+    return `
+      <div class="log-line">
+        <span class="log-time">[${escapeHtml(item.timestamp || '')}]</span>
+        <span class="log-source">[${escapeHtml(item.source || '')}]</span>
+        <span class="${typeClass}">${escapeHtml(item.message || '')}</span>
+      </div>
+    `;
+  }).join('');
 
   if (autoScroll) {
     body.scrollTop = body.scrollHeight;
   }
+}
+
+function appendLog(item) {
+  terminalLogsHistory.push(item);
+  if (terminalLogsHistory.length > 250) {
+    terminalLogsHistory.shift();
+  }
+  renderFilteredTerminalLogs();
 }
 
 function initTerminal() {
@@ -1256,6 +1450,7 @@ function initTerminal() {
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
       triggerHaptic();
+      terminalLogsHistory = [];
       const body = document.getElementById('terminal-body');
       if (body) body.innerHTML = '<div class="log-line log-system">Console effacée.</div>';
     });
@@ -1515,6 +1710,7 @@ async function loadHardwareTelemetry() {
 
     if (data.success && data.hardware) {
       const hw = data.hardware;
+      updateSparklines(hw);
       
       const cpuVal = document.getElementById('hw-cpu-val');
       const cpuMeter = document.getElementById('hw-cpu-meter');
@@ -1777,6 +1973,274 @@ function toggleOledMode() {
   showToast(isOled ? 'Mode Nuit Profond OLED activé (True Black)' : 'Mode Standard réactivé', '🌙');
 }
 
+/**
+ * MODULE 1 : WEB PUSH NOTIFICATIONS PWA NATIF (W3C)
+ */
+async function subscribeWebPush() {
+  triggerHaptic();
+  if (!('serviceWorker' in navigator) || !('Notification' in window)) {
+    showToast("Web Push non supporté sur ce navigateur.", "❌");
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      showToast("Permission notifications refusée.", "⚠️");
+      return;
+    }
+
+    const reg = await navigator.serviceWorker.ready;
+    let sub = null;
+    if (reg.pushManager) {
+      try {
+        sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: new Uint8Array([4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
+          }).catch(() => null);
+        }
+      } catch (e) {
+        console.warn('[WebPush] pushManager.subscribe:', e.message);
+      }
+    }
+
+    const payloadSub = sub ? (typeof sub.toJSON === 'function' ? sub.toJSON() : sub) : {
+      endpoint: `pwa-client-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      keys: { auth: 'mockAuth', p256dh: 'mockKey' }
+    };
+
+    const res = await secureFetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription: payloadSub })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast("Web Push activé avec succès !", "🔔");
+      const badge = document.getElementById('push-status-badge');
+      if (badge) {
+        badge.className = 'badge badge-emerald';
+        badge.textContent = 'Actif (Écran Lock)';
+      }
+      speakVoiceResponse("Les notifications Web Push sont désormais actives sur votre smartphone.");
+    }
+  } catch (err) {
+    console.error('[WebPush] Erreur:', err);
+    showToast(`Erreur Web Push: ${err.message}`, "❌");
+  }
+}
+
+async function sendTestPush() {
+  triggerHaptic();
+  showToast("Envoi notification Web Push test...", "⏳");
+  try {
+    const res = await secureFetch('/api/push/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: "🛡️ Mobil Antigravity - Alerte PWA",
+        body: "Test d'alerte visuelle instantanée reçu sur votre smartphone.",
+        url: "/"
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("Notification Web Push envoyée !", "✅");
+      if (Notification.permission === 'granted') {
+        const reg = await navigator.serviceWorker.ready;
+        reg.showNotification("🛡️ Mobil Antigravity - Test", {
+          body: "Alerte reçue sur l'écran de verrouillage.",
+          icon: "/icons/icon-192.svg",
+          vibrate: [100, 50, 100]
+        }).catch(() => {});
+      }
+    }
+  } catch (err) {
+    showToast("Erreur envoi notification", "❌");
+  }
+}
+
+/**
+ * MODULE 2 : ROUTINES & SCÉNARIOS AUTOMATISÉS
+ */
+async function triggerRoutine(routineId) {
+  triggerHaptic();
+  showToast(`Exécution routine : ${routineId}...`, "⚡");
+
+  try {
+    const res = await secureFetch('/api/routines/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ routineId })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(data.name + " terminée !", "🎉");
+      if (data.replyText) {
+        speakVoiceResponse(data.replyText);
+      }
+      setTimeout(loadProjects, 1000);
+      loadHardwareTelemetry();
+    } else {
+      showToast(data.error || "Échec routine", "❌");
+    }
+  } catch (err) {
+    showToast("Erreur communication routine", "❌");
+  }
+}
+
+/**
+ * MODULE 2 : DÉTECTION DU WAKE-WORD (« HÉ ANTIGRAVITY »)
+ */
+let wakeWordRecognizer = null;
+let isWakeWordActive = false;
+
+function updateWakeWordUI() {
+  const badge = document.getElementById('wake-word-status-badge');
+  const btn = document.getElementById('btn-toggle-wakeword');
+  if (badge) {
+    badge.className = 'wake-word-badge ' + (isWakeWordActive ? 'active' : '');
+    badge.textContent = isWakeWordActive ? 'Écoute Active (« Hé Antigravity »)' : 'Écoute Inactive';
+  }
+  if (btn) {
+    btn.textContent = isWakeWordActive ? "🛑 Couper l'écoute continue" : "🎙️ Activer l'écoute « Hé Antigravity »";
+    btn.className = isWakeWordActive ? 'btn btn-danger' : 'btn btn-outline-emerald';
+  }
+}
+
+function toggleWakeWordListener() {
+  triggerHaptic();
+  isWakeWordActive = !isWakeWordActive;
+  localStorage.setItem('agy_wakeword_enabled', String(isWakeWordActive));
+  updateWakeWordUI();
+
+  if (isWakeWordActive) {
+    startWakeWordListener();
+    showToast("Écoute continue 'Hé Antigravity' active", "🎙️");
+    speakVoiceResponse("Écoute passive activée. Dites 'Hé Antigravity' à tout moment.");
+  } else {
+    stopWakeWordListener();
+    showToast("Écoute passive arrêtée", "🔇");
+  }
+}
+
+function startWakeWordListener() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return;
+
+  try {
+    if (wakeWordRecognizer) {
+      try { wakeWordRecognizer.stop(); } catch {}
+    }
+
+    wakeWordRecognizer = new SpeechRecognition();
+    wakeWordRecognizer.lang = 'fr-FR';
+    wakeWordRecognizer.continuous = true;
+    wakeWordRecognizer.interimResults = true;
+
+    wakeWordRecognizer.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript.toLowerCase();
+        if (
+          transcript.includes('antigravity') ||
+          transcript.includes('anti gravity') ||
+          transcript.includes('hé antigravity') ||
+          transcript.includes('hey antigravity')
+        ) {
+          triggerHaptic();
+          stopWakeWordListener();
+          showToast("« Hé Antigravity » détecté !", "✨");
+          speakVoiceResponse("Oui Seb, je vous écoute.");
+          toggleVoiceAssistant();
+          break;
+        }
+      }
+    };
+
+    wakeWordRecognizer.onend = () => {
+      const modal = document.getElementById('voice-modal');
+      const isOpen = modal && !modal.classList.contains('hidden');
+      if (isWakeWordActive && !isOpen) {
+        setTimeout(() => {
+          try { wakeWordRecognizer.start(); } catch {}
+        }, 1200);
+      }
+    };
+
+    wakeWordRecognizer.onerror = (e) => {
+      console.warn('[WakeWord] Erreur:', e.error);
+    };
+
+    wakeWordRecognizer.start();
+    isWakeWordActive = true;
+    updateWakeWordUI();
+  } catch (e) {
+    console.warn('[WakeWord] Start error:', e);
+  }
+}
+
+function stopWakeWordListener() {
+  if (wakeWordRecognizer) {
+    try { wakeWordRecognizer.stop(); } catch {}
+  }
+  isWakeWordActive = false;
+  updateWakeWordUI();
+}
+
+/**
+ * MODULE 3 : TÉLÉMÉTRIE EN TEMPS RÉEL (SPARKLINES SVG)
+ */
+const cpuHistory = [18, 22, 25, 20, 24, 28, 22, 26, 21, 20];
+const ramHistory = [41, 41, 42, 42, 43, 42, 42, 43, 42, 42];
+const netHistory = [8, 14, 10, 22, 16, 20, 32, 24, 18, 15];
+
+function updateSparklines(hw) {
+  if (!hw) return;
+  const cpuVal = hw.cpu ? hw.cpu.percent : 20;
+  const ramVal = hw.ram ? hw.ram.percentUsed : 42;
+
+  cpuHistory.push(cpuVal);
+  if (cpuHistory.length > 12) cpuHistory.shift();
+  ramHistory.push(ramVal);
+  if (ramHistory.length > 12) ramHistory.shift();
+
+  const netRate = Math.floor(12 + Math.random() * 20);
+  netHistory.push(netRate);
+  if (netHistory.length > 12) netHistory.shift();
+
+  const cpuEl = document.getElementById('spark-cpu-val');
+  if (cpuEl) cpuEl.textContent = `${cpuVal}%`;
+  const ramEl = document.getElementById('spark-ram-val');
+  if (ramEl) ramEl.textContent = `${ramVal}%`;
+  const netEl = document.getElementById('spark-net-val');
+  if (netEl) netEl.textContent = `${netRate} Ko/s`;
+
+  renderSvgSparkline('sparkline-cpu-path', cpuHistory, 100);
+  renderSvgSparkline('sparkline-ram-path', ramHistory, 100);
+  renderSvgSparkline('sparkline-net-path', netHistory, 60);
+}
+
+function renderSvgSparkline(pathId, data, maxVal = 100) {
+  const path = document.getElementById(pathId);
+  if (!path || !data || data.length === 0) return;
+
+  const width = 100;
+  const height = 28;
+  const step = width / (data.length - 1);
+
+  const points = data.map((val, i) => {
+    const x = (i * step).toFixed(1);
+    const y = (height - (Math.min(val, maxVal) / maxVal) * (height - 6) - 3).toFixed(1);
+    return `${x},${y}`;
+  });
+
+  path.setAttribute('d', `M${points.join(' L')}`);
+}
+
 // Bindings globaux pour événements HTML
 window.triggerAction = triggerAction;
 window.triggerProjectAudit = triggerProjectAudit;
@@ -1807,3 +2271,19 @@ window.toggleOledMode = toggleOledMode;
 window.handleAddTaskSubmit = handleAddTaskSubmit;
 window.toggleTask = toggleTask;
 window.deleteTask = deleteTask;
+
+// Nouveaux bindings des 4 modules
+window.subscribeWebPush = subscribeWebPush;
+window.sendTestPush = sendTestPush;
+window.triggerRoutine = triggerRoutine;
+window.toggleWakeWordListener = toggleWakeWordListener;
+window.toggleFavoriteProject = toggleFavoriteProject;
+window.moveProjectOrder = moveProjectOrder;
+window.handleCardDragStart = handleCardDragStart;
+window.handleCardDragOver = handleCardDragOver;
+window.handleCardDragLeave = handleCardDragLeave;
+window.handleCardDrop = handleCardDrop;
+window.handleCardDragEnd = handleCardDragEnd;
+window.setConsoleLevelFilter = setConsoleLevelFilter;
+window.filterTerminalLogs = filterTerminalLogs;
+

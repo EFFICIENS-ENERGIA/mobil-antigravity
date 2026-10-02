@@ -23,7 +23,7 @@ import { getHardwareTelemetry } from './lib/hardware_telemetry.js';
 import { getTasks, addTask, toggleTask, deleteTask } from './lib/tasks_manager.js';
 import { sendSmsNotification, getSmsHistory, SEB_PHONE } from './lib/sms_notifier.js';
 import { isActionAllowed, sanitizePath, escapeHtml, isSafeCommandParam } from './lib/security_guard.js';
-import { printTerminalQr, generateQrSvg } from './lib/qr_generator.js';
+import { printTerminalQr, generateQrSvg, generateAndVerifyQr, generateQrFile } from './lib/qr_generator.js';
 import { 
   verifyPin, 
   verifyPairingToken, 
@@ -31,6 +31,8 @@ import {
   validateSession, 
   revokeSession, 
   extractAuthToken, 
+  getSessionDetails,
+  isLocalNetwork,
   PAIRING_TOKEN 
 } from './lib/auth_manager.js';
 import { checkRateLimit, resetRateLimit } from './lib/rate_limiter.js';
@@ -43,6 +45,21 @@ import {
   verifyBiometricAssertion, 
   hasBiometricCredentials 
 } from './lib/biometric_auth.js';
+import { 
+  savePushSubscription, 
+  removePushSubscription, 
+  getPushSubscriptions, 
+  dispatchPushNotification 
+} from './lib/push_manager.js';
+import { 
+  recordAuditEntry, 
+  getAuditLogs, 
+  verifyAuditIntegrity 
+} from './lib/immutable_audit.js';
+import { 
+  getRoutines, 
+  executeRoutine 
+} from './lib/routines_manager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,6 +91,23 @@ function getLocalIp() {
 const LOCAL_IP = getLocalIp();
 const MOBILE_URL = `http://${LOCAL_IP}:${PORT}`;
 const PAIRING_URL = `${MOBILE_URL}/?pair=${PAIRING_TOKEN}`;
+
+// Mémoire tampon pour l'auto-guérison 502 (anti-boucle de relance)
+const autoRecoveryCooldown = new Map();
+
+/**
+ * Associe un numéro de port à un projet Antigravity pour l'auto-guérison
+ * @param {number} port 
+ * @returns {{ name: string, label: string }|null}
+ */
+function findProjectByPort(port) {
+  if (port === 8092) return { name: 'SAAS EFFICIENS ENERGIA', label: 'RDV-Hub SaaS' };
+  if (port === 8080) return { name: '$HOMEagy2-projectsmy-first-project', label: 'SmartTrip Pro' };
+  if (port === 8089) return { name: 'site_construction', label: 'Bâti-Excellence Pro' };
+  if (port === 8093) return { name: 'projects/rdv_hub_omnicanal', label: 'RDV-Hub Omnicanal' };
+  if (port === 8095) return { name: 'WEBTOON PROJECT PLUME D ACIER', label: "Webtoon La Plume et l'Acier" };
+  return null;
+}
 
 // Types MIME pour les fichiers statiques
 const MIME_TYPES = {
@@ -211,6 +245,10 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const token = extractAuthToken(req);
+    const sessionDetails = token ? getSessionDetails(token) : null;
+    const isLocal = isLocalNetwork(clientIp);
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       success: true,
@@ -230,6 +268,13 @@ const server = http.createServer(async (req, res) => {
       tunnelPassword: await getPublicIp(),
       hasBiometrics: hasBiometricCredentials(),
       authenticated: !!checkAuth(),
+      session: sessionDetails,
+      network: {
+        clientIp,
+        isLocal,
+        mode: isLocal ? 'Wi-Fi Local (Session 24h)' : 'Accès Distant WAN/4G/5G (Session 1h + Biométrie)'
+      },
+      pushSubscriptionsCount: getPushSubscriptions().length,
       uptimeSeconds: Math.floor(process.uptime()),
       timestamp: new Date().toISOString()
     }));
@@ -270,9 +315,20 @@ const server = http.createServer(async (req, res) => {
       if (isPinValid || isPairingValid) {
         resetRateLimit(clientIp, 'login');
         const token = createSession(clientIp, req.headers['user-agent'] || 'unknown');
+        const sessionDetails = getSessionDetails(token);
         
         logSecurityEvent('AUTH_LOGIN_SUCCESS', clientIp, 'SUCCESS', { 
           method: isPairingValid ? 'PAIRING_TOKEN' : 'PIN' 
+        });
+
+        recordAuditEntry({
+          action: 'LOGIN',
+          target: 'Authentication Hub',
+          channel: isPairingValid ? 'Pairing Token' : 'PIN 6567',
+          ip: clientIp,
+          userAgent: req.headers['user-agent'] || 'unknown',
+          status: 'SUCCESS',
+          metadata: { networkType: sessionDetails?.networkType, isLocal: sessionDetails?.isLocal }
         });
 
         res.setHeader('Set-Cookie', `agy_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=86400`);
@@ -281,12 +337,22 @@ const server = http.createServer(async (req, res) => {
           success: true,
           token,
           sebPhone: SEB_PHONE,
-          message: 'Authentification réussie. Session active pour 24h.'
+          session: sessionDetails,
+          message: 'Authentification réussie.'
         }));
         return;
       }
 
       logSecurityEvent('AUTH_LOGIN_FAIL', clientIp, 'WARN', { attemptsRemaining: rate.remaining });
+      recordAuditEntry({
+        action: 'LOGIN_ATTEMPT',
+        target: 'Authentication Hub',
+        channel: 'PIN / Token',
+        ip: clientIp,
+        userAgent: req.headers['user-agent'] || 'unknown',
+        status: 'FAILURE',
+        metadata: { attemptsRemaining: rate.remaining }
+      });
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         success: false, 
@@ -312,6 +378,15 @@ const server = http.createServer(async (req, res) => {
 
       if (result.success && result.token) {
         logSecurityEvent('AUTH_BIOMETRIC_SUCCESS', clientIp, 'SUCCESS', { credentialId: payload.credentialId });
+        recordAuditEntry({
+          action: 'BIOMETRIC_LOGIN',
+          target: 'Authentication Hub',
+          channel: 'WebAuthn Biometric',
+          ip: clientIp,
+          userAgent: req.headers['user-agent'] || 'unknown',
+          status: 'SUCCESS',
+          metadata: { credentialId: payload.credentialId }
+        });
         res.setHeader('Set-Cookie', `agy_session=${result.token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=86400`);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result));
@@ -536,60 +611,118 @@ const server = http.createServer(async (req, res) => {
 
       let executionResult = null;
       if (parsed.recognized && parsed.action) {
-        switch (parsed.action) {
-          case 'start_saas_server':
-            executionResult = await startSaasServer();
-            break;
-          case 'stop_saas_server':
-            executionResult = await stopSaasServer();
-            break;
-          case 'launch_project':
-            executionResult = await launchProject(parsed.targetProject);
-            break;
-          case 'stop_project':
-            executionResult = await stopProject(parsed.targetProject);
-            break;
-          case 'run_audit':
-            executionResult = await runProjectAudit(parsed.targetProject || 'mobil antigravity');
-            break;
-          case 'send_sms_status':
-            const projects = await scanAntigravityProjects();
-            const msg = `📱 [VOCAL] Rapport Seb : ${projects.length} projets surveillés, contrôleur mobile opérationnel.`;
-            executionResult = await sendSmsNotification(msg, 'voice_command');
-            break;
-          case 'check_rules':
-            executionResult = { success: true, message: '18 Règles conformes.' };
-            break;
-          case 'get_status':
-            const projs = await scanAntigravityProjects();
-            const online = projs.filter(p => p.isPortActive).length;
-            executionResult = { success: true, count: projs.length, online };
-            break;
-          case 'kill_switch':
-            executionResult = await stopAllProjects();
-            break;
-          case 'morning_briefing':
-            const projsB = await scanAntigravityProjects();
-            const onB = projsB.filter(p => p.isPortActive).length;
-            const hwB = getHardwareTelemetry();
-            const tasksB = getTasks();
-            const pendingB = tasksB.filter(t => t.status !== 'DONE').length;
-            const briefVoice = `Bonjour Sébastien. Processeur à ${hwB.cpu.percent}%, mémoire à ${hwB.ram.percentUsed}%. ${onB} projet(s) en ligne sur ${projsB.length}. ${pendingB} tâche(s) d'agents en attente. Tous les voyants sont au vert.`;
-            executionResult = { success: true, briefing: briefVoice, hardware: hwB, onlineCount: onB, pendingTasks: pendingB };
-            parsed.replyText = briefVoice;
-            break;
-          case 'snapshot_project':
-            executionResult = await snapshotProject(parsed.targetProject || 'mobil antigravity');
-            break;
-          case 'get_hardware':
-            const hwH = getHardwareTelemetry();
-            executionResult = { success: true, hardware: hwH };
-            parsed.replyText = `Santé machine : Processeur à ${hwH.cpu.percent}%, RAM à ${hwH.ram.percentUsed}%, ${hwH.disk.freeGb} Go libres sur C:.`;
-            break;
-          case 'add_task':
-            const newTask = addTask(parsed.taskData || { title: transcript, assignee: '@CE', project: 'Global', source: 'Vocal Seb' });
-            executionResult = { success: true, task: newTask };
-            break;
+        if (parsed.action === 'chained_actions' && Array.isArray(parsed.commands)) {
+          const multiResults = [];
+          for (const cmd of parsed.commands) {
+            let singleRes = null;
+            switch (cmd.action) {
+              case 'start_saas_server': singleRes = await startSaasServer(); break;
+              case 'stop_saas_server': singleRes = await stopSaasServer(); break;
+              case 'launch_project': singleRes = await launchProject(cmd.targetProject); break;
+              case 'stop_project': singleRes = await stopProject(cmd.targetProject); break;
+              case 'run_audit': singleRes = await runProjectAudit(cmd.targetProject || 'mobil antigravity'); break;
+              case 'kill_switch': singleRes = await stopAllProjects(); break;
+              case 'execute_routine': singleRes = await executeRoutine(cmd.routineId || 'morning', { ip: clientIp, userAgent: req.headers['user-agent'], channel: 'Vocal NLP' }); break;
+              case 'snapshot_project': singleRes = await snapshotProject(cmd.targetProject || 'mobil antigravity'); break;
+              case 'get_hardware': singleRes = { success: true, hardware: getHardwareTelemetry() }; break;
+              default: singleRes = { success: true, action: cmd.action };
+            }
+            multiResults.push({ command: cmd.intent, action: cmd.action, result: singleRes });
+          }
+          executionResult = { chained: true, count: multiResults.length, results: multiResults };
+
+          recordAuditEntry({
+            action: 'VOICE_CHAINED_COMMANDS',
+            target: parsed.commands.map(c => c.action).join(' + '),
+            channel: 'Vocal NLP',
+            ip: clientIp,
+            userAgent: req.headers['user-agent'] || 'Unknown',
+            status: 'SUCCESS',
+            metadata: { transcript, count: parsed.commands.length, results: multiResults }
+          });
+        } else if (parsed.action === 'execute_routine') {
+          executionResult = await executeRoutine(parsed.routineId || 'morning', {
+            ip: clientIp,
+            userAgent: req.headers['user-agent'],
+            channel: 'Vocal NLP'
+          });
+          if (executionResult.replyText) parsed.replyText = executionResult.replyText;
+
+          recordAuditEntry({
+            action: `VOICE_ROUTINE_${(parsed.routineId || 'morning').toUpperCase()}`,
+            target: executionResult.name || 'Routine Automatique',
+            channel: 'Vocal NLP',
+            ip: clientIp,
+            userAgent: req.headers['user-agent'] || 'Unknown',
+            status: 'SUCCESS',
+            metadata: { transcript, routineId: parsed.routineId }
+          });
+        } else {
+          switch (parsed.action) {
+            case 'start_saas_server':
+              executionResult = await startSaasServer();
+              break;
+            case 'stop_saas_server':
+              executionResult = await stopSaasServer();
+              break;
+            case 'launch_project':
+              executionResult = await launchProject(parsed.targetProject);
+              break;
+            case 'stop_project':
+              executionResult = await stopProject(parsed.targetProject);
+              break;
+            case 'run_audit':
+              executionResult = await runProjectAudit(parsed.targetProject || 'mobil antigravity');
+              break;
+            case 'send_sms_status':
+              const projects = await scanAntigravityProjects();
+              const msg = `📱 [VOCAL] Rapport Seb : ${projects.length} projets surveillés, contrôleur mobile opérationnel.`;
+              executionResult = await sendSmsNotification(msg, 'voice_command');
+              break;
+            case 'check_rules':
+              executionResult = { success: true, message: '18 Règles conformes.' };
+              break;
+            case 'get_status':
+              const projs = await scanAntigravityProjects();
+              const online = projs.filter(p => p.isPortActive).length;
+              executionResult = { success: true, count: projs.length, online };
+              break;
+            case 'kill_switch':
+              executionResult = await stopAllProjects();
+              break;
+            case 'morning_briefing':
+              const projsB = await scanAntigravityProjects();
+              const onB = projsB.filter(p => p.isPortActive).length;
+              const hwB = getHardwareTelemetry();
+              const tasksB = getTasks();
+              const pendingB = tasksB.filter(t => t.status !== 'DONE').length;
+              const briefVoice = `Bonjour Sébastien. Processeur à ${hwB.cpu.percent}%, mémoire à ${hwB.ram.percentUsed}%. ${onB} projet(s) en ligne sur ${projsB.length}. ${pendingB} tâche(s) d'agents en attente. Tous les voyants sont au vert.`;
+              executionResult = { success: true, briefing: briefVoice, hardware: hwB, onlineCount: onB, pendingTasks: pendingB };
+              parsed.replyText = briefVoice;
+              break;
+            case 'snapshot_project':
+              executionResult = await snapshotProject(parsed.targetProject || 'mobil antigravity');
+              break;
+            case 'get_hardware':
+              const hwH = getHardwareTelemetry();
+              executionResult = { success: true, hardware: hwH };
+              parsed.replyText = `Santé machine : Processeur à ${hwH.cpu.percent}%, RAM à ${hwH.ram.percentUsed}%, ${hwH.disk.freeGb} Go libres sur C:.`;
+              break;
+            case 'add_task':
+              const newTask = addTask(parsed.taskData || { title: transcript, assignee: '@CE', project: 'Global', source: 'Vocal Seb' });
+              executionResult = { success: true, task: newTask };
+              break;
+          }
+
+          recordAuditEntry({
+            action: `VOICE_${parsed.action.toUpperCase()}`,
+            target: parsed.targetProject || 'System',
+            channel: 'Vocal NLP',
+            ip: clientIp,
+            userAgent: req.headers['user-agent'] || 'Unknown',
+            status: 'SUCCESS',
+            metadata: { transcript, intent: parsed.intent }
+          });
         }
       }
 
@@ -599,6 +732,7 @@ const server = http.createServer(async (req, res) => {
         recognized: parsed.recognized,
         action: parsed.action,
         intent: parsed.intent,
+        commands: parsed.commands || null,
         targetProject: parsed.targetProject || null,
         replyText: parsed.replyText,
         executionResult
@@ -711,9 +845,26 @@ const server = http.createServer(async (req, res) => {
         case 'delete_task':
           result = { success: true, deleted: deleteTask(payload.id || payload.taskId) };
           break;
+        case 'execute_routine':
+          result = await executeRoutine(payload.routineId || payload.targetProject || 'morning', {
+            ip: clientIp,
+            userAgent: req.headers['user-agent'] || 'Unknown',
+            channel: '1-Tap UI'
+          });
+          break;
         default:
           result = { success: false, message: 'Action non implémentée.' };
       }
+
+      recordAuditEntry({
+        action: action.toUpperCase(),
+        target: payload.targetProject || payload.routineId || 'System',
+        channel: '1-Tap UI',
+        ip: clientIp,
+        userAgent: req.headers['user-agent'] || 'Unknown',
+        status: result.success !== false ? 'SUCCESS' : 'FAILURE',
+        metadata: { action }
+      });
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result));
@@ -762,7 +913,105 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // --- REVERSE PROXY POUR ACCÈS 4G/5G AUX PROJETS (/proxy/:port/*) ---
+  // 17. POST /api/push/subscribe (Abonnement PWA Web Push Natif W3C)
+  if (req.method === 'POST' && pathname === '/api/push/subscribe') {
+    try {
+      const payload = await readJsonBody();
+      const sub = payload.subscription || payload;
+      const result = savePushSubscription(sub, req.headers['user-agent'] || 'unknown', clientIp);
+      recordAuditEntry({
+        action: 'PUSH_SUBSCRIBE',
+        target: 'Web Push Manager',
+        channel: 'PWA WebPush',
+        ip: clientIp,
+        userAgent: req.headers['user-agent'] || 'unknown',
+        status: 'SUCCESS',
+        metadata: { id: result.id }
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (err) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // 18. POST /api/push/send (Envoi/Dispatch d'une notification Web Push)
+  if (req.method === 'POST' && pathname === '/api/push/send') {
+    try {
+      const payload = await readJsonBody();
+      const result = await dispatchPushNotification(payload);
+      recordAuditEntry({
+        action: 'PUSH_DISPATCH',
+        target: payload.title || 'Notification',
+        channel: 'PWA WebPush',
+        ip: clientIp,
+        userAgent: req.headers['user-agent'] || 'unknown',
+        status: 'SUCCESS',
+        metadata: { title: payload.title, count: result.sentCount }
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (err) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // 19. GET /api/push/status (État et liste des abonnements push)
+  if (req.method === 'GET' && pathname === '/api/push/status') {
+    const list = getPushSubscriptions();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, count: list.length, subscriptions: list }));
+    return;
+  }
+
+  // 20. GET /api/routines (Catalogue des routines et scénarios)
+  if (req.method === 'GET' && pathname === '/api/routines') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, routines: getRoutines() }));
+    return;
+  }
+
+  // 21. POST /api/routines/execute (Exécution d'une routine automatisée)
+  if (req.method === 'POST' && pathname === '/api/routines/execute') {
+    try {
+      const payload = await readJsonBody();
+      const routineId = payload.routineId || 'morning';
+      const result = await executeRoutine(routineId, {
+        ip: clientIp,
+        userAgent: req.headers['user-agent'] || 'unknown',
+        channel: '1-Tap UI'
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (err) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // 22. GET /api/audit/logs (Journal d'audit immuable cryptographique - OWASP A09)
+  if (req.method === 'GET' && pathname === '/api/audit/logs') {
+    const integrity = verifyAuditIntegrity();
+    const logs = getAuditLogs(100);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      count: logs.length,
+      integrity,
+      logs
+    }));
+    return;
+  }
+
+  // --- REVERSE PROXY POUR ACCÈS 4G/5G AUX PROJETS (/proxy/:port/*) AVEC AUTO-GUÉRISON (AUTO-RECOVERY 502) ---
   if (pathname.startsWith('/proxy/')) {
     const proxyMatch = pathname.match(/^\/proxy\/(\d+)(\/.*)?$/);
     if (proxyMatch) {
@@ -785,13 +1034,37 @@ const server = http.createServer(async (req, res) => {
       });
 
       proxyReq.on('error', () => {
+        // MODULE 3.2 : Auto-Recovery (Auto-Guérison 502)
+        const proj = findProjectByPort(targetPort);
+        if (proj) {
+          const lastRecovery = autoRecoveryCooldown.get(targetPort) || 0;
+          if (Date.now() - lastRecovery > 8000) {
+            autoRecoveryCooldown.set(targetPort, Date.now());
+            broadcastLog('system', `🛠️ [AUTO-HEALING] Erreur HTTP 502 sur port ${targetPort} - Relance automatique initiée pour ${proj.label}...`, 'AUTO_HEALING');
+            recordAuditEntry({
+              action: 'AUTO_RECOVERY_502',
+              target: `${proj.label} (Port ${targetPort})`,
+              channel: 'Auto-Healing',
+              ip: clientIp,
+              userAgent: req.headers['user-agent'] || 'Unknown',
+              status: 'TRIGGERED'
+            });
+            launchProject(proj.name).then(() => {
+              broadcastLog('system', `✅ [AUTO-HEALING] ${proj.label} relancé avec succès (Port ${targetPort}).`, 'AUTO_HEALING');
+            }).catch((err) => {
+              broadcastLog('stderr', `❌ [AUTO-HEALING] Échec relance ${proj.label}: ${err.message}`, 'AUTO_HEALING');
+            });
+          }
+        }
+
         if (!res.headersSent) {
           res.writeHead(502, { 'Content-Type': 'text/html; charset=utf-8' });
           res.end(`
             <div style="font-family: system-ui; max-width: 500px; margin: 40px auto; padding: 24px; background: #1e293b; color: #f8fafc; border-radius: 12px; text-align: center;">
               <h2>⚠️ Projet non démarré (Port ${targetPort})</h2>
               <p style="color: #94a3b8; font-size: 0.95rem;">Ce serveur n'est pas encore en cours d'exécution.</p>
-              <p><a href="/" style="display: inline-block; padding: 10px 20px; background: #10b981; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700;">Retourner au Hub Mobile</a></p>
+              ${proj ? `<p style="color: #10b981; font-size: 0.85rem; margin-top: 10px;">🛠️ Auto-guérison active : tentative de relance de ${proj.label} en cours...</p>` : ''}
+              <p><a href="/" style="display: inline-block; padding: 10px 20px; background: #10b981; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700; margin-top: 14px;">Retourner au Hub Mobile</a></p>
             </div>
           `);
         }
@@ -860,9 +1133,23 @@ server.listen(PORT, '0.0.0.0', () => {
   broadcastLog('system', `Serveur Antigravity Mobile Pilot actif sur ${MOBILE_URL}`, 'SERVER_INIT');
   printTerminalQr(MOBILE_URL, process.env.SEB_PIN || '6567', PAIRING_URL);
 
+  // S'assurer que le fichier QR PNG existe immédiatement
+  const capturesDir = path.resolve('captures');
+  if (!fs.existsSync(capturesDir)) fs.mkdirSync(capturesDir, { recursive: true });
+  const qrDefaultFile = path.join(capturesDir, 'qr_seb_mobile.png');
+  generateQrFile(PAIRING_URL, qrDefaultFile).catch(() => {});
+
   // Démarrage automatique de la passerelle 4G/5G distante en arrière-plan
-  startRemoteTunnel(PORT).then(remoteUrl => {
+  startRemoteTunnel(PORT).then(async remoteUrl => {
     broadcastLog('system', `🌍 Passerelle 4G/5G HTTPS active : ${remoteUrl}`, 'TUNNEL_READY');
+    try {
+      const qrRes = await generateAndVerifyQr(remoteUrl, PAIRING_TOKEN);
+      if (qrRes.success) {
+        broadcastLog('system', `📷 QR Code PNG certifié (Healthcheck Cloudflare 200 OK) généré`, 'QR_READY');
+      }
+    } catch (qrErr) {
+      broadcastLog('system', `Avertissement génération QR: ${qrErr.message}`, 'QR_WARN');
+    }
   }).catch(err => {
     broadcastLog('system', `Note 4G/5G : ${err.message}`, 'TUNNEL_INFO');
   });

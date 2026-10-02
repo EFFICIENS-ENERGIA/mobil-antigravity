@@ -1,0 +1,17 @@
+[
+  {
+    "id": "da58d69612bee06a",
+    "subscription": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/test_seb_mobile_token_owasp",
+      "keys": {
+        "p256dh": "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvSoP10GEWqct3728Up2GS0vSWx52AI6U392zpmdq1168j8K487fF4",
+        "auth": "f5Q9t-W1G-21X84b-B4o6A"
+      }
+    },
+    "endpoint": "https://fcm.googleapis.com/fcm/send/test_seb_mobile_token_owasp",
+    "userAgent": "unknown",
+    "clientIp": "127.0.0.1",
+    "updatedAt": "2026-10-02T12:14:32.566Z",
+    "createdAt": "2026-10-02T12:09:42.312Z"
+  }
+]

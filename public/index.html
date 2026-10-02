@@ -206,6 +206,30 @@
         </button>
       </div>
 
+      <!-- ROUTINES AUTOMATISÉES (MODULE 2) -->
+      <div class="glass-card action-card">
+        <div class="card-header">
+          <div class="card-title">⚡ Routines & Scénarios Automatisés</div>
+          <span class="badge badge-emerald">Orchestrateur</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+          Déclenchez des séquences combinées en 1-Tap avec rapport vocal synthétisé pour Seb.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn btn-primary" onclick="triggerRoutine('morning')">
+            🌅 Routine du Matin (RDV-Hub + SmartTrip + Bâti)
+          </button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button class="btn btn-secondary" onclick="triggerRoutine('full_audit')">
+              🛡️ Audit Global @AUD
+            </button>
+            <button class="btn btn-danger" onclick="triggerRoutine('stop_all')">
+              🌙 Arrêt Global
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- ACCÈS 4G/5G HORS DOMICILE -->
       <div class="glass-card remote-access-card" id="remote-tunnel-card">
         <div class="card-header">
@@ -370,9 +394,53 @@
 
     <!-- ONGLET 3 : CONSOLE & LOGS TEMPS RÉEL -->
     <section class="tab-pane" id="tab-console">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
         <h2 style="font-size: 1.1rem; font-weight: 700;">Console Système</h2>
-        <span class="badge badge-emerald">SSE Connecté</span>
+        <span class="badge badge-emerald" id="sse-status-badge">SSE Connecté</span>
+      </div>
+
+      <!-- MODULE 3.1 : TÉLÉMÉTRIE EN TEMPS RÉEL (SPARKLINES SVG) -->
+      <div class="sparklines-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+        <div class="sparkline-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+            <span>CPU</span>
+            <span id="spark-cpu-val" style="color: var(--emerald-light); font-weight: 700;">--%</span>
+          </div>
+          <svg id="sparkline-cpu" viewBox="0 0 100 28" style="width: 100%; height: 28px; margin-top: 4px;">
+            <path id="sparkline-cpu-path" d="M0,20 L20,18 L40,15 L60,19 L80,12 L100,16" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="sparkline-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+            <span>RAM</span>
+            <span id="spark-ram-val" style="color: #60a5fa; font-weight: 700;">--%</span>
+          </div>
+          <svg id="sparkline-ram" viewBox="0 0 100 28" style="width: 100%; height: 28px; margin-top: 4px;">
+            <path id="sparkline-ram-path" d="M0,18 L20,17 L40,16 L60,16 L80,15 L100,15" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="sparkline-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+            <span>4G/5G WAN</span>
+            <span id="spark-net-val" style="color: #a78bfa; font-weight: 700;">Actif</span>
+          </div>
+          <svg id="sparkline-net" viewBox="0 0 100 28" style="width: 100%; height: 28px; margin-top: 4px;">
+            <path id="sparkline-net-path" d="M0,24 L20,20 L40,22 L60,14 L80,18 L100,10" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- MODULE 3.3 : RECHERCHE ET FILTRES SÉVÉRITÉ CONSOLE SSE -->
+      <div class="console-filter-bar" style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+        <input type="search" id="console-search-input" placeholder="🔍 Rechercher dans les logs..." oninput="filterTerminalLogs()" style="flex: 1; min-height: 34px; padding: 6px 12px; background: rgba(13,17,23,0.85); border: 1px solid var(--border-glass); border-radius: 8px; color: #fff; font-size: 0.78rem;">
+        <div style="display: flex; gap: 4px;" id="console-level-filters">
+          <button class="filter-chip active" onclick="setConsoleLevelFilter('ALL')" data-level="ALL" style="padding: 4px 8px; font-size: 0.68rem;">TOUS</button>
+          <button class="filter-chip" onclick="setConsoleLevelFilter('INFO')" data-level="INFO" style="padding: 4px 8px; font-size: 0.68rem;">INFO</button>
+          <button class="filter-chip" onclick="setConsoleLevelFilter('WARN')" data-level="WARN" style="padding: 4px 8px; font-size: 0.68rem;">WARN</button>
+          <button class="filter-chip" onclick="setConsoleLevelFilter('ERROR')" data-level="ERROR" style="padding: 4px 8px; font-size: 0.68rem;">ERROR</button>
+        </div>
       </div>
 
       <div class="terminal-window">
@@ -424,6 +492,39 @@
         </p>
         <button class="btn btn-outline-emerald" onclick="registerBiometrics()" id="btn-register-bio">
           📱 Configurer / Enregistrer mon Empreinte
+        </button>
+      </div>
+
+      <!-- MODULE 1 : WEB PUSH NOTIFICATIONS PWA NATIF (W3C) -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">🔔 Notifications Web Push (PWA Natif)</div>
+          <span class="badge badge-emerald" id="push-status-badge">W3C Prêt</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+          Recevez des alertes visuelles instantanées sur l'écran de verrouillage du smartphone même application fermée.
+        </p>
+        <div class="btn-grid">
+          <button class="btn btn-primary" onclick="subscribeWebPush()" id="btn-subscribe-push">
+            🔔 Activer Web Push
+          </button>
+          <button class="btn btn-secondary" onclick="sendTestPush()">
+            ⚡ Tester Alerte Push
+          </button>
+        </div>
+      </div>
+
+      <!-- MODULE 2 : ASSISTANT VOCAL WAKE-WORD -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">👂 Wake-Word « Hé Antigravity »</div>
+          <span class="wake-word-badge" id="wake-word-status-badge">Écoute Inactive</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+          Détection vocale continue en arrière-plan sans bouton : dites simplement « Hé Antigravity » pour parler à l'assistant.
+        </p>
+        <button class="btn btn-outline-emerald" onclick="toggleWakeWordListener()" id="btn-toggle-wakeword">
+          🎙️ Activer l'écoute Wake-Word
         </button>
       </div>
 

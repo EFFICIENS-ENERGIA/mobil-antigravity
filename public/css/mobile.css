@@ -1399,4 +1399,89 @@ body.oled-mode .lock-screen-container {
   text-overflow: ellipsis;
 }
 
+/* --- MODULE 1 & 2 : FAVORIS, DRAG & DROP ET WAKE WORD --- */
+.favorite-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-dim);
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.favorite-btn.active {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+
+.card-draggable {
+  cursor: grab;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-draggable:active {
+  cursor: grabbing;
+}
+
+.card-dragging {
+  opacity: 0.45;
+  transform: scale(0.98);
+  border: 1px dashed var(--emerald);
+}
+
+.card-drop-target {
+  border-top: 3px solid var(--emerald) !important;
+}
+
+.wake-word-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+}
+
+.wake-word-badge.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: var(--emerald);
+  color: var(--emerald-light);
+  animation: pulse-ring 2s infinite;
+}
+
+/* --- MODULE 3 : TÉLÉMÉTRIE TEMPS RÉEL SPARKLINES & CONSOLE SSE --- */
+.sparkline-card {
+  background: rgba(13, 17, 23, 0.85);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.console-filter-bar input[type="search"] {
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.console-filter-bar input[type="search"]:focus {
+  border-color: var(--emerald);
+}
+
+.filter-chip.active {
+  background: var(--emerald);
+  color: #000;
+  font-weight: 700;
+  border-color: var(--emerald);
+}
+
+
 

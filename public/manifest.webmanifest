@@ -23,6 +23,20 @@
   ],
   "shortcuts": [
     {
+      "name": "Lancer SaaS RDV-Hub",
+      "short_name": "RDV-Hub",
+      "description": "Activation du serveur SaaS sur le port 8092",
+      "url": "/?open=saas",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Démarrer SmartTrip",
+      "short_name": "SmartTrip",
+      "description": "Lancement du serveur SmartTrip Pro sur le port 8080",
+      "url": "/?open=smarttrip",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
       "name": "Assistant Vocal IA",
       "short_name": "Vocal Seb",
       "description": "Dictée vocale et commandes exécutives",
@@ -41,13 +55,6 @@
       "short_name": "Banc d'Essai",
       "description": "Certification automatique OWASP",
       "url": "/?open=audit",
-      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
-    },
-    {
-      "name": "Lancer SaaS RDV-Hub",
-      "short_name": "RDV-Hub",
-      "description": "Activation du serveur SaaS sur le port 8092",
-      "url": "/?open=saas",
       "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
     }
   ]
