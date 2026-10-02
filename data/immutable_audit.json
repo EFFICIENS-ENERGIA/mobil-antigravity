@@ -2707,5 +2707,435 @@
     "metadata": {},
     "prevHash": "959062e36259324db32f6d14a4e620e76e849719e639880e70ff9e4d6dc4b25d",
     "hash": "dbb3e29dece0696d183671aec05183023669db94ff14647f5c7d850d3f7d63f3"
+  },
+  {
+    "id": 168,
+    "timestamp": "2026-10-02T15:26:53.962Z",
+    "action": "AUTO_HEALING_RESTORED",
+    "target": "RDV-Hub SaaS",
+    "channel": "Auto-Healing Watcher",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {},
+    "prevHash": "dbb3e29dece0696d183671aec05183023669db94ff14647f5c7d850d3f7d63f3",
+    "hash": "91cc95c5af10fddba8ae49e141b46c64093552411ff40c713ec138dff3944d6a"
+  },
+  {
+    "id": 169,
+    "timestamp": "2026-10-02T15:26:59.097Z",
+    "action": "AUTO_HEALING_RESTORED",
+    "target": "SmartTrip Pro",
+    "channel": "Auto-Healing Watcher",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {},
+    "prevHash": "91cc95c5af10fddba8ae49e141b46c64093552411ff40c713ec138dff3944d6a",
+    "hash": "17a2c08832aade3015065ab83ad2c871123bc43b56fce29c4f08c099498d70f2"
+  },
+  {
+    "id": 170,
+    "timestamp": "2026-10-02T15:27:04.235Z",
+    "action": "AUTO_HEALING_RESTORED",
+    "target": "Bâti-Excellence Pro",
+    "channel": "Auto-Healing Watcher",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {},
+    "prevHash": "17a2c08832aade3015065ab83ad2c871123bc43b56fce29c4f08c099498d70f2",
+    "hash": "5a1df0095e74d2f7c3f96cad56bbe529cc120407a2878dfc5f71e9cece913c6e"
+  },
+  {
+    "id": 171,
+    "timestamp": "2026-10-02T15:41:25.366Z",
+    "action": "LOGIN",
+    "target": "Authentication Hub",
+    "channel": "Pairing Token",
+    "ip": "2a0d:e487:311e:d95a::59a:2b9e",
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Mobile Safari/537.36",
+    "status": "SUCCESS",
+    "metadata": {
+      "networkType": "REMOTE_WAN_4G_5G",
+      "isLocal": false
+    },
+    "prevHash": "5a1df0095e74d2f7c3f96cad56bbe529cc120407a2878dfc5f71e9cece913c6e",
+    "hash": "b9c761d660a30bc5dcccaaeada2316c79c768aba778d2ff4abd6b1204a462e1d"
+  },
+  {
+    "id": 172,
+    "timestamp": "2026-10-02T16:09:27.781Z",
+    "action": "LOGIN",
+    "target": "Authentication Hub",
+    "channel": "PIN 6567",
+    "ip": "127.0.0.1",
+    "userAgent": "unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "networkType": "LOCAL_LAN",
+      "isLocal": true
+    },
+    "prevHash": "b9c761d660a30bc5dcccaaeada2316c79c768aba778d2ff4abd6b1204a462e1d",
+    "hash": "870ca12a55434fbe918440087202be329fe963903e5fe95450a827719d8f1758"
+  },
+  {
+    "id": 173,
+    "timestamp": "2026-10-02T16:09:29.049Z",
+    "action": "LOGIN_ATTEMPT",
+    "target": "Authentication Hub",
+    "channel": "PIN / Token",
+    "ip": "198.51.100.99",
+    "userAgent": "unknown",
+    "status": "FAILURE",
+    "metadata": {
+      "attemptsRemaining": 4
+    },
+    "prevHash": "870ca12a55434fbe918440087202be329fe963903e5fe95450a827719d8f1758",
+    "hash": "6210d3b45a08efa2286e1be44c6e8bbcf1f2cfb7d7ff1c527b7eac6f8877ea44"
+  },
+  {
+    "id": 174,
+    "timestamp": "2026-10-02T16:09:29.063Z",
+    "action": "LOGIN_ATTEMPT",
+    "target": "Authentication Hub",
+    "channel": "PIN / Token",
+    "ip": "198.51.100.99",
+    "userAgent": "unknown",
+    "status": "FAILURE",
+    "metadata": {
+      "attemptsRemaining": 3
+    },
+    "prevHash": "6210d3b45a08efa2286e1be44c6e8bbcf1f2cfb7d7ff1c527b7eac6f8877ea44",
+    "hash": "dfe688c4b16e8f9d55b4cc00eb1081c6ac388a927131c709cb315c7478f81312"
+  },
+  {
+    "id": 175,
+    "timestamp": "2026-10-02T16:09:29.077Z",
+    "action": "LOGIN_ATTEMPT",
+    "target": "Authentication Hub",
+    "channel": "PIN / Token",
+    "ip": "198.51.100.99",
+    "userAgent": "unknown",
+    "status": "FAILURE",
+    "metadata": {
+      "attemptsRemaining": 2
+    },
+    "prevHash": "dfe688c4b16e8f9d55b4cc00eb1081c6ac388a927131c709cb315c7478f81312",
+    "hash": "9c234b27ecf11fb940ff6de51b6ef9e5ea99f54f14f3f1c8b432f1c6e48bf9ba"
+  },
+  {
+    "id": 176,
+    "timestamp": "2026-10-02T16:09:29.093Z",
+    "action": "LOGIN_ATTEMPT",
+    "target": "Authentication Hub",
+    "channel": "PIN / Token",
+    "ip": "198.51.100.99",
+    "userAgent": "unknown",
+    "status": "FAILURE",
+    "metadata": {
+      "attemptsRemaining": 1
+    },
+    "prevHash": "9c234b27ecf11fb940ff6de51b6ef9e5ea99f54f14f3f1c8b432f1c6e48bf9ba",
+    "hash": "b115d3a08804b6ae53f696afb01d43fe7e51f5462de9ea17c179e931fe4c9b70"
+  },
+  {
+    "id": 177,
+    "timestamp": "2026-10-02T16:09:29.107Z",
+    "action": "LOGIN_ATTEMPT",
+    "target": "Authentication Hub",
+    "channel": "PIN / Token",
+    "ip": "198.51.100.99",
+    "userAgent": "unknown",
+    "status": "FAILURE",
+    "metadata": {
+      "attemptsRemaining": 0
+    },
+    "prevHash": "b115d3a08804b6ae53f696afb01d43fe7e51f5462de9ea17c179e931fe4c9b70",
+    "hash": "f4c84d57c9f23e0f5690c0393ac3d9117367d62b100b4a900acea95fae5e64e4"
+  },
+  {
+    "id": 178,
+    "timestamp": "2026-10-02T16:09:29.134Z",
+    "action": "VOICE_START_SAAS_SERVER",
+    "target": "SAAS EFFICIENS ENERGIA",
+    "channel": "Vocal NLP",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "transcript": "Lance le serveur SaaS RDV-Hub s’il te plaît",
+      "intent": "START_SAAS"
+    },
+    "prevHash": "f4c84d57c9f23e0f5690c0393ac3d9117367d62b100b4a900acea95fae5e64e4",
+    "hash": "485a18bd87a8ba98f60a1e5546747715f49333e9ca5d7f3f5aa750d63cc2c401"
+  },
+  {
+    "id": 179,
+    "timestamp": "2026-10-02T16:09:29.155Z",
+    "action": "BIOMETRIC_LOGIN",
+    "target": "Authentication Hub",
+    "channel": "WebAuthn Biometric",
+    "ip": "127.0.0.1",
+    "userAgent": "unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "credentialId": "seb_faceid_master_key"
+    },
+    "prevHash": "485a18bd87a8ba98f60a1e5546747715f49333e9ca5d7f3f5aa750d63cc2c401",
+    "hash": "f2adbbb694dbd76b420c455cf4badc0c2da14327dc5a8f1786c5b44e5527e5b2"
+  },
+  {
+    "id": 180,
+    "timestamp": "2026-10-02T16:09:29.173Z",
+    "action": "LAUNCH_PROJECT",
+    "target": "$HOMEagy2-projectsmy-first-project",
+    "channel": "1-Tap UI",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "action": "launch_project"
+    },
+    "prevHash": "f2adbbb694dbd76b420c455cf4badc0c2da14327dc5a8f1786c5b44e5527e5b2",
+    "hash": "1db89b390ca5a9945caa004fcf324edb23ccf69d528f4023bb82a3dc3868a0b0"
+  },
+  {
+    "id": 181,
+    "timestamp": "2026-10-02T16:09:29.198Z",
+    "action": "STOP_PROJECT",
+    "target": "$HOMEagy2-projectsmy-first-project",
+    "channel": "1-Tap UI",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "action": "stop_project"
+    },
+    "prevHash": "1db89b390ca5a9945caa004fcf324edb23ccf69d528f4023bb82a3dc3868a0b0",
+    "hash": "ce915f73c3064ab5984628e31e9bd5de73de7d6eb3505818b0295db21f6cb60d"
+  },
+  {
+    "id": 182,
+    "timestamp": "2026-10-02T16:09:29.232Z",
+    "action": "RUN_AUDIT",
+    "target": "$HOMEagy2-projectsmy-first-project",
+    "channel": "1-Tap UI",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "action": "run_audit"
+    },
+    "prevHash": "ce915f73c3064ab5984628e31e9bd5de73de7d6eb3505818b0295db21f6cb60d",
+    "hash": "4447857ff0294e0242e1c46f6b506dfa6c0e51bb9074758ca43c7108133deb39"
+  },
+  {
+    "id": 183,
+    "timestamp": "2026-10-02T16:09:29.250Z",
+    "action": "VOICE_RUN_AUDIT",
+    "target": "$HOMEagy2-projectsmy-first-project",
+    "channel": "Vocal NLP",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "transcript": "Fais un audit de sécurité pour SmartTrip s’il te plaît",
+      "intent": "RUN_AUDIT"
+    },
+    "prevHash": "4447857ff0294e0242e1c46f6b506dfa6c0e51bb9074758ca43c7108133deb39",
+    "hash": "82253be28140fa35dd9eed9bb74750cef1935e9e5d1993128fc020e0bb0f596b"
+  },
+  {
+    "id": 184,
+    "timestamp": "2026-10-02T16:09:29.325Z",
+    "action": "KILL_SWITCH",
+    "target": "System",
+    "channel": "1-Tap UI",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "action": "kill_switch"
+    },
+    "prevHash": "82253be28140fa35dd9eed9bb74750cef1935e9e5d1993128fc020e0bb0f596b",
+    "hash": "2c0c583212aa937efd8865949ac00b36232ff2304f56bb377a3f5c5afa52a05a"
+  },
+  {
+    "id": 185,
+    "timestamp": "2026-10-02T16:09:29.942Z",
+    "action": "PUSH_SUBSCRIBE",
+    "target": "Web Push Manager",
+    "channel": "PWA WebPush",
+    "ip": "127.0.0.1",
+    "userAgent": "unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "id": "da58d69612bee06a"
+    },
+    "prevHash": "2c0c583212aa937efd8865949ac00b36232ff2304f56bb377a3f5c5afa52a05a",
+    "hash": "5ab86ca82c929c6450f53869c2a4d73ca3799aa63db7e62969f5e27f2c02e87d"
+  },
+  {
+    "id": 186,
+    "timestamp": "2026-10-02T16:09:29.951Z",
+    "action": "PUSH_DISPATCH",
+    "target": "Alerte Système Antigravity",
+    "channel": "PWA WebPush",
+    "ip": "127.0.0.1",
+    "userAgent": "unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "title": "Alerte Système Antigravity",
+      "count": 1
+    },
+    "prevHash": "5ab86ca82c929c6450f53869c2a4d73ca3799aa63db7e62969f5e27f2c02e87d",
+    "hash": "7a404c3554670a8b17060e5ed25f09e94dc6c121e32062b3f202779398841474"
+  },
+  {
+    "id": 187,
+    "timestamp": "2026-10-02T16:09:30.094Z",
+    "action": "VOICE_CHAINED_COMMANDS",
+    "target": "start_saas_server + launch_project",
+    "channel": "Vocal NLP",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "transcript": "Relance le serveur RDV-Hub et lance SmartTrip Pro",
+      "count": 2,
+      "results": [
+        {
+          "command": "START_SAAS",
+          "action": "start_saas_server",
+          "result": {
+            "success": true,
+            "message": "Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (PID 16316)",
+            "port": 8092,
+            "url": "http://192.168.1.76:8092"
+          }
+        },
+        {
+          "command": "START_SMARTTRIP",
+          "action": "launch_project",
+          "result": {
+            "success": true,
+            "message": "Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (PID 22472)",
+            "port": 8080,
+            "url": "http://192.168.1.76:8080"
+          }
+        }
+      ]
+    },
+    "prevHash": "7a404c3554670a8b17060e5ed25f09e94dc6c121e32062b3f202779398841474",
+    "hash": "e241b36e54ac167242f926941c403f20aa4cf02c6ef25cceb9ef9d17a4b3a68b"
+  },
+  {
+    "id": 188,
+    "timestamp": "2026-10-02T16:09:30.164Z",
+    "action": "EXECUTE_ROUTINE_MORNING",
+    "target": "Routine du Matin (Morning Routine)",
+    "channel": "1-Tap UI",
+    "ip": "127.0.0.1",
+    "userAgent": "unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "executionResults": [
+        {
+          "project": "SAAS EFFICIENS ENERGIA",
+          "success": true,
+          "message": "RDV-Hub SaaS est déjà en ligne sur le port 8092",
+          "port": 8092
+        },
+        {
+          "project": "$HOMEagy2-projectsmy-first-project",
+          "success": true,
+          "message": "SmartTrip Pro est déjà en ligne sur le port 8080",
+          "port": 8080
+        },
+        {
+          "project": "site_construction",
+          "success": true,
+          "message": "Projet \"Bâti-Excellence Pro\" lancé avec succès sur le port 8089 (PID 21412)",
+          "port": 8089
+        }
+      ]
+    },
+    "prevHash": "e241b36e54ac167242f926941c403f20aa4cf02c6ef25cceb9ef9d17a4b3a68b",
+    "hash": "757a51dd5a6e9979884777af22f532ba031fa12e42fb9fb7fcf09a5c7c6a3f86"
+  },
+  {
+    "id": 189,
+    "timestamp": "2026-10-02T16:09:30.205Z",
+    "action": "LOGIN",
+    "target": "Authentication Hub",
+    "channel": "PIN 6567",
+    "ip": "203.0.113.88",
+    "userAgent": "unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "networkType": "REMOTE_WAN_4G_5G",
+      "isLocal": false
+    },
+    "prevHash": "757a51dd5a6e9979884777af22f532ba031fa12e42fb9fb7fcf09a5c7c6a3f86",
+    "hash": "07a66d4250aba23a94e324f0286e040f691b840ff1c07f2cbe45bd8321fa6d35"
+  },
+  {
+    "id": 190,
+    "timestamp": "2026-10-02T16:09:30.275Z",
+    "action": "ZERO_DOWNTIME_DEPLOY",
+    "target": "Production (GitHub Auto-Sync)",
+    "channel": "PIN 6567",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "clientIp": "127.0.0.1"
+    },
+    "prevHash": "07a66d4250aba23a94e324f0286e040f691b840ff1c07f2cbe45bd8321fa6d35",
+    "hash": "3969910bc2714d74cf898b64384d7dfbc8f5bd4d815b4faf66b4611d3b623fd9"
+  },
+  {
+    "id": 191,
+    "timestamp": "2026-10-02T16:09:30.282Z",
+    "action": "GITHUB_SIMULATE",
+    "target": "Type: commit",
+    "channel": "PWA Component",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "commit"
+    },
+    "prevHash": "3969910bc2714d74cf898b64384d7dfbc8f5bd4d815b4faf66b4611d3b623fd9",
+    "hash": "f9c6d881c57f8e4af8cca3f6f94f7580968d3d816cccf10d56f2359e957d13db"
+  },
+  {
+    "id": 192,
+    "timestamp": "2026-10-02T16:09:30.288Z",
+    "action": "GITHUB_SIMULATE",
+    "target": "Type: workflow",
+    "channel": "PWA Component",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {
+      "type": "workflow"
+    },
+    "prevHash": "f9c6d881c57f8e4af8cca3f6f94f7580968d3d816cccf10d56f2359e957d13db",
+    "hash": "f345ab1b8df1b48219ed29aebf161ed7fbb61925341de5a837da703779c94975"
+  },
+  {
+    "id": 193,
+    "timestamp": "2026-10-02T16:09:35.280Z",
+    "action": "AUTO_HEALING_RESTORED",
+    "target": "RDV-Hub SaaS",
+    "channel": "Auto-Healing Watcher",
+    "ip": "127.0.0.1",
+    "userAgent": "Unknown",
+    "status": "SUCCESS",
+    "metadata": {},
+    "prevHash": "f345ab1b8df1b48219ed29aebf161ed7fbb61925341de5a837da703779c94975",
+    "hash": "ed5163500323f1a5f97298e0ea29d4e80c63e4268cd04f0006ea1d28093cbf16"
   }
 ]
