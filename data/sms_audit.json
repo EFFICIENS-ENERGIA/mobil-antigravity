@@ -1,5 +1,175 @@
 [
   {
+    "id": "sms_1790953285685",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"Bâti-Excellence Pro\" lancé avec succès sur le port 8089 (http://192.168.1.76:8089). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:01:25.685Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790953285652",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:01:25.652Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790953285626",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:01:25.626Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790953282234",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY KILL SWITCH] Tous les serveurs ont été arrêtés avec succès (2 services). Machine au repos.",
+    "trigger": "kill_switch",
+    "timestamp": "2026-10-02T15:01:22.234Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790953282085",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY] Serveur \"SmartTrip Pro\" (Port 8080) arrêté depuis votre smartphone.",
+    "trigger": "project_stop",
+    "timestamp": "2026-10-02T15:01:22.085Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790953281883",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "Test sécurité @AUD : Session chiffrée validée.",
+    "trigger": "smartphone_manual",
+    "timestamp": "2026-10-02T15:01:21.883Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790953281814",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:01:21.814Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790953275698",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T15:01:15.698Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945372333",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"Bâti-Excellence Pro\" lancé avec succès sur le port 8089 (http://192.168.1.76:8089). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T12:49:32.333Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945372299",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T12:49:32.299Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945372277",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T12:49:32.277Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945371596",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY KILL SWITCH] Tous les serveurs ont été arrêtés avec succès (2 services). Machine au repos.",
+    "trigger": "kill_switch",
+    "timestamp": "2026-10-02T12:49:31.596Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945355450",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🔴 [ANTIGRAVITY] Serveur \"SmartTrip Pro\" (Port 8080) arrêté depuis votre smartphone.",
+    "trigger": "project_stop",
+    "timestamp": "2026-10-02T12:49:15.450Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945355300",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "Test sécurité @AUD : Session chiffrée validée.",
+    "trigger": "smartphone_manual",
+    "timestamp": "2026-10-02T12:49:15.300Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945340962",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"Bâti-Excellence Pro\" lancé avec succès sur le port 8089 (http://192.168.1.76:8089). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T12:49:00.962Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945335807",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"SmartTrip Pro\" lancé avec succès sur le port 8080 (http://192.168.1.76:8080). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T12:48:55.807Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
+    "id": "sms_1790945330641",
+    "to": "+33778246567",
+    "displayPhone": "07 78 24 65 67",
+    "message": "🟢 [ANTIGRAVITY] Projet \"RDV-Hub SaaS\" lancé avec succès sur le port 8092 (http://192.168.1.76:8092). Accessible depuis votre smartphone.",
+    "trigger": "project_launch",
+    "timestamp": "2026-10-02T12:48:50.641Z",
+    "status": "DELIVERED",
+    "provider": "ANTIGRAVITY_SMS_GATEWAY"
+  },
+  {
     "id": "sms_1790943272653",
     "to": "+33778246567",
     "displayPhone": "07 78 24 65 67",
@@ -826,176 +996,6 @@
     "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
     "trigger": "audit_completion",
     "timestamp": "2026-09-28T21:40:29.804Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631617963",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:40:17.963Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631613025",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:40:13.025Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631608147",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:40:08.147Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631602703",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:40:02.703Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631592445",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:39:52.445Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631543131",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:39:03.131Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631528426",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:38:48.426Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631350975",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:35:50.975Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631341131",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:35:41.131Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631278816",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:34:38.816Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631265953",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:34:25.953Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631180865",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:33:00.865Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790631172614",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:32:52.614Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790630760499",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:26:00.499Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790630749691",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:25:49.691Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790630733282",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "🛡️ [ANTIGRAVITY AUD] Résultat du banc d'essai : ✅ 100% PASS",
-    "trigger": "audit_completion",
-    "timestamp": "2026-09-28T21:25:33.282Z",
-    "status": "DELIVERED",
-    "provider": "ANTIGRAVITY_SMS_GATEWAY"
-  },
-  {
-    "id": "sms_1790630720648",
-    "to": "+33778246567",
-    "displayPhone": "07 78 24 65 67",
-    "message": "Test sécurité @AUD : Session chiffrée validée.",
-    "trigger": "smartphone_manual",
-    "timestamp": "2026-09-28T21:25:20.648Z",
     "status": "DELIVERED",
     "provider": "ANTIGRAVITY_SMS_GATEWAY"
   }

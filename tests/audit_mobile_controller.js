@@ -542,12 +542,19 @@ async function runFullAudit() {
     });
     const statusData = JSON.parse(statusRes.body);
 
+    const { sendDualChannelAlert } = await import('../lib/push_manager.js');
+    const dualRes = await sendDualChannelAlert('Test Fallback Dual-Channel vers Seb', {
+      title: 'Alerte Test Dual-Channel',
+      body: 'Validation du double canal Web Push + SMS'
+    });
+
     const valid = subRes.statusCode === 200 && subData.success === true &&
                   sendRes.statusCode === 200 && sendData.success === true &&
-                  statusRes.statusCode === 200 && statusData.count >= 1;
-    recordTest(28, 'Web Push Notifications W3C PWA Natif (Abonnement, Envoi, Statut)', valid, `Abonnement persisté (${statusData.count} actif(s)), Push délivré (${sendData.sentCount || 1} destinataire(s))`);
+                  statusRes.statusCode === 200 && statusData.count >= 1 &&
+                  dualRes.success === true && dualRes.targetPhone.includes('07 78 24 65 67');
+    recordTest(28, 'Web Push Notifications W3C & Fallback Dual-Channel SMS vers 07 78 24 65 67', valid, `Web Push (${statusData.count} abonné(s)) • Dual-Channel validé: Canal [${dualRes.channelUsed}] vers ${dualRes.targetPhone}`);
   } catch (e) {
-    recordTest(28, 'Web Push Notifications W3C PWA Natif', false, e.message);
+    recordTest(28, 'Web Push Notifications W3C & Fallback SMS', false, e.message);
   }
 
   // TEST 29 : Commandes Vocales Multi-Actions & Chaînées NLP (Connecteurs "et", "puis", "ensuite")
@@ -585,11 +592,23 @@ async function runFullAudit() {
     recordTest(30, 'Orchestration des Routines Automatisées', false, e.message);
   }
 
-  // TEST 31 : Auto-Guérison (Auto-Recovery 502) sur Reverse Proxy (/proxy/:port/)
+  // TEST 31 : Auto-Guérison (Auto-Recovery 502) sur Reverse Proxy & Circuit Breaker (2 max / 15 min)
   try {
     const proxyRes = await requestHttp('GET', '/proxy/8092/');
-    const valid = (proxyRes.statusCode === 502 && proxyRes.body.includes('Auto-guérison active')) || proxyRes.statusCode === 200;
-    recordTest(31, 'Auto-Guérison (Auto-Recovery 502) sur Reverse Proxy avec Relance Auto', valid, `Code HTTP ${proxyRes.statusCode} intercepté, Watcher d'auto-guérison et relance de fond déclenchés`);
+    const proxyInterception = (proxyRes.statusCode === 502 && proxyRes.body.includes('Auto-guérison active')) || proxyRes.statusCode === 200;
+
+    const statusRes = await requestHttp('GET', '/api/healing/status', null, {
+      'Authorization': `Bearer ${sessionToken}`
+    });
+    const statusData = JSON.parse(statusRes.body);
+
+    const hasServices = statusData.success === true && Array.isArray(statusData.services) &&
+                        statusData.services.some(s => s.port === 8092) &&
+                        statusData.services.some(s => s.port === 8080);
+    const breakerOk = statusData.maxConsecutiveRecoveries === 2 && statusData.circuitBreakerWindowMs === 900000;
+
+    const valid = proxyInterception && hasServices && breakerOk;
+    recordTest(31, 'Auto-Guérison (Auto-Recovery 502) sur Reverse Proxy & Circuit Breaker', valid, `Proxy: HTTP ${proxyRes.statusCode} • Surveillance: ${statusData.services?.length} services (RDV-Hub 8092, SmartTrip 8080) • Circuit Breaker: 2 relances max / 15 min`);
   } catch (e) {
     recordTest(31, 'Auto-Guérison (Auto-Recovery 502) sur Reverse Proxy', false, e.message);
   }
@@ -632,8 +651,14 @@ async function runFullAudit() {
     const remoteStatusData = JSON.parse(remoteStatusRes.body);
     const remoteTtlOk = remoteStatusData.session && remoteStatusData.session.ttlRemainingSeconds <= 3600 && remoteStatusData.session.isLocal === false && remoteStatusData.session.requiresBiometricReauth === true;
 
-    const valid = localTtlOk && remoteTtlOk;
-    recordTest(33, 'Gestion Dynamique des Sessions Réseau (Wi-Fi 24h vs Distant WAN/4G/5G 1h)', valid, `Wi-Fi Local: TTL ${statusData.session?.ttlRemainingSeconds}s (24h) • WAN 4G/5G: TTL ${remoteStatusData.session?.ttlRemainingSeconds}s (1h, Biométrie exigée)`);
+    // Test du middleware enforceSessionNetworkPolicy pour action critique en WAN
+    const { enforceSessionNetworkPolicy } = await import('../lib/session-network-policy.js');
+    const mockWanReq = { socket: { remoteAddress: '203.0.113.88' }, headers: {} };
+    const policyResult = enforceSessionNetworkPolicy(mockWanReq, remoteToken, 'kill_switch');
+    const biometricChallengeEnforced = policyResult.allowed === false && policyResult.requiresBiometric === true;
+
+    const valid = localTtlOk && remoteTtlOk && biometricChallengeEnforced;
+    recordTest(33, 'Gestion Dynamique des Sessions Réseau (Wi-Fi 24h vs Distant WAN/4G/5G 1h) & Re-challenge WebAuthn', valid, `Wi-Fi Local: TTL 24h • WAN 4G/5G: TTL 1h (Biométrie requise) • Action critique "kill_switch" en WAN: Re-challenge WebAuthn certifié`);
   } catch (e) {
     recordTest(33, 'Gestion Dynamique des Sessions Réseau', false, e.message);
   }

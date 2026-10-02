@@ -1,5 +1,25 @@
 [
   {
+    "id": "task_1790953282187_1fs",
+    "title": "Vérifier la résistance thermique R=7 sur Bâti-Excellence",
+    "assignee": "@DEV",
+    "project": "site_construction",
+    "status": "DONE",
+    "createdAt": "2026-10-02T15:01:22.187Z",
+    "source": "Test Automatisé",
+    "completedAt": "2026-10-02T15:01:22.197Z"
+  },
+  {
+    "id": "task_1790945371564_hnk",
+    "title": "Vérifier la résistance thermique R=7 sur Bâti-Excellence",
+    "assignee": "@DEV",
+    "project": "site_construction",
+    "status": "DONE",
+    "createdAt": "2026-10-02T12:49:31.564Z",
+    "source": "Test Automatisé",
+    "completedAt": "2026-10-02T12:49:31.574Z"
+  },
+  {
     "id": "task_1790943269241_9am",
     "title": "Vérifier la résistance thermique R=7 sur Bâti-Excellence",
     "assignee": "@DEV",

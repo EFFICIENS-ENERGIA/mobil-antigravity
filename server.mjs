@@ -60,6 +60,19 @@ import {
   getRoutines, 
   executeRoutine 
 } from './lib/routines_manager.js';
+import { 
+  evaluateNetworkContext, 
+  enforceSessionNetworkPolicy,
+  NETWORK_MODES 
+} from './lib/session-network-policy.js';
+import { 
+  startAutoHealingWatcher, 
+  stopAutoHealingWatcher, 
+  getAutoHealingStatus, 
+  triggerAutoRecovery, 
+  MONITORED_SERVICES 
+} from './lib/auto-healing-service.js';
+import { sendDualChannelAlert } from './lib/push_manager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -785,6 +798,19 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      // MODULE 3 : Contrôleur de Session Dynamique selon le Réseau (Wi-Fi vs WAN) & Re-challenge WebAuthn
+      const token = extractAuthToken(req);
+      const networkEnforcement = enforceSessionNetworkPolicy(req, token, action);
+      if (!networkEnforcement.allowed) {
+        res.writeHead(networkEnforcement.statusCode || 403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: false,
+          error: networkEnforcement.error,
+          requiresBiometric: !!networkEnforcement.requiresBiometric
+        }));
+        return;
+      }
+
       logSecurityEvent('ACTION_EXECUTED', clientIp, 'SUCCESS', { action, target: payload.targetProject });
       broadcastLog('system', `Action mobile autorisée: [${action}]`, 'SECURE_API');
 
@@ -1011,6 +1037,35 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // 23. GET /api/healing/status (Statut du Watcher d'Auto-Guérison et du Circuit Breaker)
+  if (req.method === 'GET' && pathname === '/api/healing/status') {
+    const status = getAutoHealingStatus();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, ...status }));
+    return;
+  }
+
+  // 24. POST /api/healing/trigger (Déclenchement d'une auto-guérison ciblée)
+  if (req.method === 'POST' && pathname === '/api/healing/trigger') {
+    try {
+      const payload = await readJsonBody();
+      const targetPort = parseInt(payload.port, 10);
+      const service = MONITORED_SERVICES.find(s => s.port === targetPort) || {
+        name: `Service Port ${targetPort}`,
+        port: targetPort,
+        projectName: 'mobil antigravity'
+      };
+      const result = await triggerAutoRecovery(service, payload.source || 'API_TRIGGER');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (err) {
+      if (res.headersSent) return;
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
   // --- REVERSE PROXY POUR ACCÈS 4G/5G AUX PROJETS (/proxy/:port/*) AVEC AUTO-GUÉRISON (AUTO-RECOVERY 502) ---
   if (pathname.startsWith('/proxy/')) {
     const proxyMatch = pathname.match(/^\/proxy\/(\d+)(\/.*)?$/);
@@ -1024,6 +1079,7 @@ const server = http.createServer(async (req, res) => {
         port: targetPort,
         path: targetUrl,
         method: req.method,
+        timeout: 2000,
         headers: {
           ...req.headers,
           host: `127.0.0.1:${targetPort}`
@@ -1033,28 +1089,18 @@ const server = http.createServer(async (req, res) => {
         proxyRes.pipe(res);
       });
 
+      proxyReq.on('timeout', () => {
+        proxyReq.destroy(new Error('Proxy Timeout'));
+      });
+
       proxyReq.on('error', () => {
-        // MODULE 3.2 : Auto-Recovery (Auto-Guérison 502)
-        const proj = findProjectByPort(targetPort);
-        if (proj) {
-          const lastRecovery = autoRecoveryCooldown.get(targetPort) || 0;
-          if (Date.now() - lastRecovery > 8000) {
-            autoRecoveryCooldown.set(targetPort, Date.now());
-            broadcastLog('system', `🛠️ [AUTO-HEALING] Erreur HTTP 502 sur port ${targetPort} - Relance automatique initiée pour ${proj.label}...`, 'AUTO_HEALING');
-            recordAuditEntry({
-              action: 'AUTO_RECOVERY_502',
-              target: `${proj.label} (Port ${targetPort})`,
-              channel: 'Auto-Healing',
-              ip: clientIp,
-              userAgent: req.headers['user-agent'] || 'Unknown',
-              status: 'TRIGGERED'
-            });
-            launchProject(proj.name).then(() => {
-              broadcastLog('system', `✅ [AUTO-HEALING] ${proj.label} relancé avec succès (Port ${targetPort}).`, 'AUTO_HEALING');
-            }).catch((err) => {
-              broadcastLog('stderr', `❌ [AUTO-HEALING] Échec relance ${proj.label}: ${err.message}`, 'AUTO_HEALING');
-            });
-          }
+        // MODULE 2 : Auto-Recovery (Auto-Guérison 502 & Circuit Breaker)
+        const service = MONITORED_SERVICES.find(s => s.port === targetPort) || null;
+
+        if (service) {
+          triggerAutoRecovery(service, 'REVERSE_PROXY_502').catch(err => {
+            console.warn('[AUTO-HEALING] Erreur tâche d\'auto-guérison:', err.message);
+          });
         }
 
         if (!res.headersSent) {
@@ -1063,7 +1109,7 @@ const server = http.createServer(async (req, res) => {
             <div style="font-family: system-ui; max-width: 500px; margin: 40px auto; padding: 24px; background: #1e293b; color: #f8fafc; border-radius: 12px; text-align: center;">
               <h2>⚠️ Projet non démarré (Port ${targetPort})</h2>
               <p style="color: #94a3b8; font-size: 0.95rem;">Ce serveur n'est pas encore en cours d'exécution.</p>
-              ${proj ? `<p style="color: #10b981; font-size: 0.85rem; margin-top: 10px;">🛠️ Auto-guérison active : tentative de relance de ${proj.label} en cours...</p>` : ''}
+              ${service ? `<p style="color: #10b981; font-size: 0.85rem; margin-top: 10px;">🛠️ Auto-guérison active : tentative de relance de ${service.name} en cours...</p>` : ''}
               <p><a href="/" style="display: inline-block; padding: 10px 20px; background: #10b981; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700; margin-top: 14px;">Retourner au Hub Mobile</a></p>
             </div>
           `);
@@ -1138,6 +1184,9 @@ server.listen(PORT, '0.0.0.0', () => {
   if (!fs.existsSync(capturesDir)) fs.mkdirSync(capturesDir, { recursive: true });
   const qrDefaultFile = path.join(capturesDir, 'qr_seb_mobile.png');
   generateQrFile(PAIRING_URL, qrDefaultFile).catch(() => {});
+
+  // Démarrage du Watcher d'Auto-Guérison (Auto-Recovery 502) & Circuit Breaker
+  startAutoHealingWatcher(30000);
 
   // Démarrage automatique de la passerelle 4G/5G distante en arrière-plan
   startRemoteTunnel(PORT).then(async remoteUrl => {

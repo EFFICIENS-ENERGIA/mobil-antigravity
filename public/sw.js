@@ -100,8 +100,8 @@ self.addEventListener('push', (event) => {
       url: data.url || '/'
     },
     actions: [
-      { action: 'open', title: 'Ouvrir Hub' },
-      { action: 'close', title: 'Ignorer' }
+      { action: 'open_pwa', title: 'Ouvrir PWA' },
+      { action: 'restart_server', title: 'Relancer le Serveur' }
     ]
   };
 
@@ -113,21 +113,36 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  if (event.action === 'close') return;
+  // Si l'utilisateur clique sur "Relancer le Serveur"
+  if (event.action === 'restart_server') {
+    const targetPort = event.notification.data?.port || 8092;
+    event.waitUntil(
+      fetch('/api/healing/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ port: targetPort, source: 'PUSH_NOTIFICATION_ACTION' })
+      }).catch(() => {}).then(() => {
+        return openOrFocusConsole();
+      })
+    );
+    return;
+  }
 
-  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          client.navigate(targetUrl);
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
-      }
-    })
-  );
+  // Par défaut ("Ouvrir PWA" ou clic direct sur la notification) : rediriger vers la console de logs SSE
+  event.waitUntil(openOrFocusConsole());
 });
+
+function openOrFocusConsole() {
+  const targetUrl = '/?open=console';
+  return clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+    for (const client of clientList) {
+      if (client.url.includes(self.location.origin) && 'focus' in client) {
+        client.navigate(targetUrl);
+        return client.focus();
+      }
+    }
+    if (clients.openWindow) {
+      return clients.openWindow(targetUrl);
+    }
+  });
+}

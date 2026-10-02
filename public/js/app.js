@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       else if (openAction === 'audit') triggerProjectAudit('mobil antigravity');
       else if (openAction === 'saas') triggerAction('start_saas_server');
       else if (openAction === 'smarttrip') triggerAction('launch_project', '$HOMEagy2-projectsmy-first-project');
+      else if (openAction === 'console') switchTab('console');
     }, 800);
   }
 
